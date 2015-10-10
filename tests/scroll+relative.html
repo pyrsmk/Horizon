@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				height: 1600px;
+			}
+			
+			.block {
+				background: crimson;
+				position: relative;
+				width: 100px;
+				height: 100px;
+				top: 700px;
+				margin: 0 auto;
+				opacity: 0;
+			}
+		</style>
+		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/Horizon.min.js"></script>
+		<script src="../build/Scroll.min.js"></script>
+	</head>
+	<body>
+		<div class="block"></div>
+		<script>
+			
+			var Horizon = require('Horizon').getInstance();
+			Horizon.detectLayout();
+			
+			Horizon.scroll(quark.$('.block').node, function(args) {
+				var interpolations = {};
+				interpolations[args.centerY - 300] = {scaleX: 1, opacity: 0};
+				interpolations[args.centerY] = {scaleX: 5, opacity: 1};
+				interpolations[args.centerY + 300] = {scaleX: 1, opacity: 0};
+				var data = Horizon.interpolate(args.y, interpolations);
+				return data;
+			});
+			
+		</script>
+	</body>
+</html>

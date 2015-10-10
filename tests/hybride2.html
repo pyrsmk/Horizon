@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			html, body {
+				height: 100%;
+			}
+			
+			body {
+				margin: 0;
+				overflow-y: hidden;
+			}
+			
+			.loading {
+				width: 0;
+				height: 0.5em;
+				background: #111;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 1;
+			}
+			
+			.layout {
+				height: 100%;
+				width: 600vh;
+			}
+			
+			.scene {
+				position: absolute;
+				left: 0;
+				top: 0;
+				height: 100%; /* utile pour mettre le layout à l'échelle */
+			}
+		</style>
+		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../node_modules/pyrsmk-imagine/imagine.min.js"></script>
+		<script src="../build/Horizon.min.js"></script>
+		<script src="../build/Scroll.min.js"></script>
+		<script src="../build/Wheel.min.js"></script>
+		<script src="../build/Swipe.min.js"></script>
+		<script src="../build/Canvas2D.min.js"></script>
+	</head>
+	<body>
+		<div class="loading"></div>
+		<div class="layout"></div>
+		<canvas class="scene">
+			<img data-src="images/ground1.jpg">
+			<img data-src="images/logoBouvet.png" data-left="510" data-top="50" data-factor="-0.4">
+			<img data-src="images/ile.png" data-left="300" data-top="200" data-factor="-0.4">
+			<img data-src="images/glacon.png" data-left="250" data-top="400" data-factor="-0.2">
+			<img data-src="images/ground2.jpg" data-left="1778">
+			<img class="icebottle" data-src="images/IceBottle.png" data-left="2000" data-top="100" data-factor="-0.2">
+			<img data-src="images/montgolfiere.png" data-left="2400" data-top="150" data-factor="0.3">
+			<img data-src="images/photosCuvee.jpg" data-left="4713">
+		</canvas>
+		<script>
+			
+			// ====== Prepare ======
+			
+			var Horizon = require('Horizon').getInstance(),
+				W = require('W'),
+				$ = quark.$,
+				$$ = quark.$$,
+				hybride_base = 1080,
+				elements = [],
+				children = $('.scene').node.children;
+			
+			Horizon.detectLayout();
+			
+			// ====== Init inputs ======
+			
+			Horizon.initPlugin('scroll'); // temporaire
+			
+			Horizon.initPlugin('swipe', {
+				boundX: [-Horizon.layout.width, 0]
+			});
+			
+			Horizon.swipe(window, function(args) {
+				Horizon.setXY('scroll', {x: -args.x});
+			});
+			
+			Horizon.wheel(window, function(args) {
+				Horizon.setXY('scroll', {x: ((args.x - Horizon.x) * 10) + Horizon.x}); // accelerate wheel
+			});
+			
+			// ====== Resize canvas ======
+			
+			var resizeCanvas = function() {
+					Horizon.detectLayout();
+					$('.scene').node.width = Horizon.layout.width;
+					$('.scene').node.height = Horizon.layout.height;
+				};
+			
+			W.addListener(resizeCanvas);
+			resizeCanvas();
+			
+			// ====== Scale elements ======
+			
+			var scaleElement = function(node) {
+					Horizon.detectLayout();
+					var ratio = Horizon.layout.height / hybride_base;
+					node.canvas2d.scale = {x: ratio, y: ratio};
+				};
+			
+			W.addListener(function() {
+				for(var i=0, j=elements.length; i<j; ++i) {
+					scaleElement(elements[i]);
+				}
+			});
+			
+			// ====== Init scene ======
+			
+			Horizon.canvas2d($('.scene').node, elements);
+			
+			// ====== Load images ======
+			
+			var loading_images = children.length,
+				srcs = [],
+				load = function(node) {
+					imagine(node.getAttribute('data-src')).then(function(images) {
+						// Get position
+						var left = node.getAttribute('data-left') ? parseInt(node.getAttribute('data-left'),10) : 0,
+							top = node.getAttribute('data-top') ? parseInt(node.getAttribute('data-top'),10) : 0;
+						// Init element
+						var element = images[0];
+						element.canvas2d = {};
+						element.canvas2d.left = left;
+						element.canvas2d.top = top;
+						element.canvas2d.opacity = 0;
+						element.canvas2d.rotation = 0;
+						elements.push(element);
+						node.canvas2d = element.canvas2d;
+						// Scale element
+						scaleElement(element);
+						// Parallax
+						var factor = parseFloat(node.getAttribute('data-factor'));
+						if(isFinite(factor)) {
+							Horizon.scroll(element.canvas2d, function(args) {
+								return {left: args.x * factor + left}
+							});
+						}
+						// Show the element
+						TweenLite.to(element.canvas2d, 0.5, {opacity: 1});
+						// Animate loading bar
+						var percent = (children.length - (--loading_images)) * 100 / children.length;
+						TweenLite.to($('.loading').node, 0.25, {width: percent + '%'});
+					});
+				};
+			
+			// Load images
+			for(i=0, j=children.length; i<j; ++i) {
+				load(children[i]);
+				srcs.push(children[i].getAttribute('data-src'));
+			}
+			
+			// Hide loading bar
+			imagine(srcs).then(function(images) {
+				TweenLite.to($('.loading').node, 0.25, {opacity: 0});
+			});
+			
+			// ====== Parallax ======
+			
+			imagine($('.icebottle').node.getAttribute('data-src')).then(function() {
+				Horizon.scroll($('.icebottle').node.canvas2d, function(args) {
+					return {rotation: - args.x * 360 / Horizon.layout.width};
+				});
+			});
+			
+		</script>
+	</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			html, body {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+			
+			body {
+				background: url('images/background.jpg');
+				background-size: cover;
+				background-position: 50% 50%;
+			}
+			
+			.block {
+				width: 100%;
+				height: 100%;
+				background: hsla(0,50%,50%,0.3);
+			}
+		</style>
+		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/Horizon.min.js"></script>
+		<script src="../build/Wheel.min.js"></script>
+	</head>
+	<body>
+		<div class="block"></div>
+		<script>
+			
+			var Horizon = require('Horizon').getInstance();
+			
+			Horizon.wheel(quark.$('.block').node, function(args) {
+				return {
+					background: 'hsla('+(args.y/10)+',50%,50%,0.3)'
+				};
+			});
+			
+		</script>
+	</body>
+</html>

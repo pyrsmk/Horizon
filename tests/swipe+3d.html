@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			html, body {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+			
+			.container {
+				width: 200px;
+				height: 200px;
+				position: relative;
+				perspective: 1000px;
+				margin: 0 auto;
+				top: 100px;
+			}
+
+			.container__object {
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				transform-style: preserve-3d;
+			}
+
+			.container__object figure {
+				margin: 0;
+				width: 196px;
+				height: 196px;
+				display: block;
+				position: absolute;
+				border: 2px solid black;
+			}
+			
+			.container__object .front  { transform: rotateY(   0deg ) translateZ( 100px ); background: crimson; }
+			.container__object .back   { transform: rotateX( 180deg ) translateZ( 100px ); background: deepskyblue; }
+			.container__object .right  { transform: rotateY(  90deg ) translateZ( 100px ); background: yellowgreen; }
+			.container__object .left   { transform: rotateY( -90deg ) translateZ( 100px ); background: greenyellow; }
+			.container__object .top    { transform: rotateX(  90deg ) translateZ( 100px ); background: coral; }
+			.container__object .bottom { transform: rotateX( -90deg ) translateZ( 100px ); background: deeppink; }
+		</style>
+		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/Horizon.min.js"></script>
+		<script src="../build/Swipe.min.js"></script>
+	</head>
+	<body>
+		<section class="container">
+			<div class="container__object">
+				<figure class="front"></figure>
+				<figure class="back"></figure>
+				<figure class="right"></figure>
+				<figure class="left"></figure>
+				<figure class="top"></figure>
+				<figure class="bottom"></figure>
+			</div>
+		</section>
+		<script>
+			
+			var Horizon = require('Horizon').getInstance();
+			Horizon.detectLayout();
+			
+			Horizon.swipe(quark.$('.container__object').node, function(args) {
+				return {
+					rotationX: -args.y,
+					rotationY: args.x
+				};
+			});
+			
+		</script>
+		
+	</body>
+</html>

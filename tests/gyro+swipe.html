@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			html, body {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+			
+			.block {
+				background: crimson;
+				position: absolute;
+				width: 100px;
+				height: 100px;
+				left: 100px;
+				top: 100px;
+			}
+		</style>
+		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/Horizon.min.js"></script>
+		<script src="../build/Gyroscope.min.js"></script>
+		<script src="../build/Swipe.min.js"></script>
+	</head>
+	<body>
+		<div class="block"></div>
+		<script>
+			
+			var Horizon = require('Horizon').getInstance();
+			
+			Horizon.detectLayout();
+			Horizon.boundaries = true;
+			
+			Horizon.parallax(['gyro', 'swipe'], quark.$('.block').node, function(args) {
+				return {
+					left: args.x,
+					top: args.y,
+					rotation: args.z
+				};
+			});
+			
+		</script>
+	</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			html, body {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/Horizon.min.js"></script>
+		<script src="../build/Mouse.min.js"></script>
+		<script src="../build/Background.min.js"></script>
+	</head>
+	<body>
+		<script>
+			
+			var Horizon = require('Horizon').getInstance();
+			
+			Horizon.background(quark.$('body').node, 'images/background.jpg');
+			
+		</script>
+	</body>
+</html>
