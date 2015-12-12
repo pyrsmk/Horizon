@@ -1,5 +1,4 @@
-require('../bower_components/gsap/src/uncompressed/plugins/ScrollToPlugin.js');
-var Horizon = require('Horizon').getInstance();
+require('../node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js');
 
 Horizon._registerPlugin('scroll', function() {
 	// Define rendering function

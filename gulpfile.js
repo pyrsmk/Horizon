@@ -7,8 +7,7 @@ var fs = require('fs'),
 	shell = require('gulp-shell'),
 	babelify = require('babelify'),
 	browserify = require('browserify'),
-	buffer = require('vinyl-buffer'),
-	source = require('vinyl-source-stream');
+	through2 = require('through2');
 
 var version = fs.readFileSync('./src/Horizon.js', {encoding:'utf8'}).match(/^\/\*\! \w+ ([0-9.]+)/)[1];
 
@@ -16,22 +15,26 @@ var version = fs.readFileSync('./src/Horizon.js', {encoding:'utf8'}).match(/^\/\
 
 gulp.task('version', function() {
 	var streams = merge();
-	streams.push(
+	
+	streams.add(
 		gulp.src( 'package.json' )
 			.pipe( replace(/"version": "[0-9.]+",/, '"version": "'+version+'",') )
 			.pipe( gulp.dest('.') )
 	);
-	streams.push(
+	
+	streams.add(
 		gulp.src( 'README.md' )
 			.pipe( replace(/^(\w+) [0-9.]+/, '$1 '+version) )
 			.pipe( gulp.dest('.') )
 	);
+	
 	return streams;
 });
 
 // ======================================== gulp build
 
-gulp.task('build', function() {
+gulp.task('build', ['version'], function() {
+	var streams = merge();
 	
 	fs.readdirSync('./src/').forEach(function(file) {
 		var name = file.substr(0, file.length - 3);
@@ -40,32 +43,51 @@ gulp.task('build', function() {
 			return;
 		}
 		
-		browserify('./src/'+file)
-			.external('Horizon')
-			.bundle()
-			.pipe(source(name+'.min.js'))
-			.pipe(buffer())
-			.pipe(uglify())
-			.pipe(gulp.dest('./build/'));
+		streams.add(
+			gulp.src( './src/'+file )
+				.pipe( through2.obj(function(file, enc, next) {
+					browserify(file.path).bundle(function(err, res) {
+						file.contents = res;
+						next(null, file);
+					});
+				}) )
+				.pipe( gulp.dest('./build/unminified/') )
+				.pipe( uglify() )
+				.pipe( rename(name+'.min.js') )
+				.pipe( gulp.dest('./build/minified/') )
+		);
 	});
 	
-	browserify()
-		.require('./src/Horizon.js', {expose: 'Horizon'})
-		.require('./bower_components/W/W.min.js', {expose: 'W'})
-		.transform(babelify)
-		.bundle()
-		.pipe(source('Horizon.min.js'))
-		.pipe(buffer())
-		.pipe(uglify())
-		.pipe(gulp.dest('./build/'));
+	streams.add(
+		gulp.src( './src/Horizon.js' )
+			.pipe( through2.obj(function(file, enc, next) {
+				var b = browserify(file.path, {standalone: 'Horizon'});
+
+				b.transform(babelify);
+
+				b.bundle(function(err, res) {
+					file.contents = Buffer.concat([
+						res,
+						new Buffer('window.Horizon = new Horizon();', 'utf-8')
+					]);
+					next(null, file);
+				});
+			}) )
+			.pipe( gulp.dest('./build/unminified/') )
+			.pipe( uglify() )
+			.pipe( rename('Horizon.min.js') )
+			.pipe( gulp.dest('./build/minified/') )
+	);
 	
+	return streams;
 });
 
 // ======================================== gulp publish
 
 gulp.task('publish', shell.task([
-	'npm publish',
-	'jam publish'
+	"git tag -a "+version+" -m '"+version+"'",
+	'git push --tags',
+	'npm publish'
 ]));
 
 // ======================================== gulp

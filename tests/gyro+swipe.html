@@ -19,16 +19,16 @@
 				top: 100px;
 			}
 		</style>
-		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/Horizon.min.js"></script>
-		<script src="../build/Gyroscope.min.js"></script>
-		<script src="../build/Swipe.min.js"></script>
+		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/minified/Horizon.min.js"></script>
+		<script src="../build/minified/Gyroscope.min.js"></script>
+		<script src="../build/minified/Swipe.min.js"></script>
 	</head>
 	<body>
 		<div class="block"></div>
 		<script>
-			
-			var Horizon = require('Horizon').getInstance();
+			var $ = quark.$,
+				$$ = quark.$$;
 			
 			Horizon.detectLayout();
 			Horizon.boundaries = true;

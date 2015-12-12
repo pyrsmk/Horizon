@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				margin: 0;
+			}
+			
+			.layout {
+				width: 100%;
+				height: 2000px;
+			}
+			
+			.scene {
+				position: fixed;
+				left: 0;
+				top: 0;
+			}
+			
+			img {
+				display: none;
+			}
+		</style>
+		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/minified/Horizon.min.js"></script>
+		<script src="../build/minified/Scroll.min.js"></script>
+		<script src="../build/minified/Canvas2D.min.js"></script>
+	</head>
+	<body>
+		<div class="layout"></div>
+		<img src="images/rock.png">
+		<canvas class="scene"></canvas>
+		<script>
+			
+			var $ = quark.$,
+				$$ = quark.$$;
+			
+			Horizon.detectLayout();
+			
+			$('.scene').node.width = Horizon.viewport.width;
+			$('.scene').node.height = Horizon.viewport.height;
+			
+			Horizon.canvas2d($('.scene').node, [$('img').node]);
+			
+			$('img').node.canvas2d = {
+				left: (Horizon.layout.width - $('img').node.naturalWidth) / 2,
+				top: -300,
+				rotation: 0
+			};
+			
+			Horizon.scroll($('img').node.canvas2d, function(args) {
+				return {
+					top: args.y * 1.2 - 300,
+					rotation: - args.y * 360 / Horizon.viewport.height
+				};
+			});
+			
+		</script>
+	</body>
+</html>

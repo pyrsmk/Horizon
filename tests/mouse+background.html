@@ -10,17 +10,22 @@
 				overflow: hidden;
 			}
 		</style>
-		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/Horizon.min.js"></script>
-		<script src="../build/Mouse.min.js"></script>
-		<script src="../build/Background.min.js"></script>
+		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/minified/Horizon.min.js"></script>
+		<script src="../build/minified/Mouse.min.js"></script>
+		<script src="../build/minified/Background.min.js"></script>
 	</head>
 	<body>
 		<script>
 			
-			var Horizon = require('Horizon').getInstance();
+			var $ = quark.$,
+				$$ = quark.$$;
 			
-			Horizon.background(quark.$('body').node, 'images/background.jpg');
+			Horizon.background(
+				$('body').node,
+				'images/background.jpg',
+				102
+			);
 			
 		</script>
 	</body>

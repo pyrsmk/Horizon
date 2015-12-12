@@ -42,9 +42,9 @@
 			.container__object .top    { transform: rotateX(  90deg ) translateZ( 100px ); background: coral; }
 			.container__object .bottom { transform: rotateX( -90deg ) translateZ( 100px ); background: deeppink; }
 		</style>
-		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/Horizon.min.js"></script>
-		<script src="../build/Swipe.min.js"></script>
+		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/minified/Horizon.min.js"></script>
+		<script src="../build/minified/Swipe.min.js"></script>
 	</head>
 	<body>
 		<section class="container">
@@ -59,10 +59,10 @@
 		</section>
 		<script>
 			
-			var Horizon = require('Horizon').getInstance();
-			Horizon.detectLayout();
+			var $ = quark.$,
+				$$ = quark.$$;
 			
-			Horizon.swipe(quark.$('.container__object').node, function(args) {
+			Horizon.swipe($('.container__object').node, function(args) {
 				return {
 					rotationX: -args.y,
 					rotationY: args.x

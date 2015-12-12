@@ -22,17 +22,18 @@
 				background: hsla(0,50%,50%,0.3);
 			}
 		</style>
-		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/Horizon.min.js"></script>
-		<script src="../build/Wheel.min.js"></script>
+		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/minified/Horizon.min.js"></script>
+		<script src="../build/minified/Wheel.min.js"></script>
 	</head>
 	<body>
 		<div class="block"></div>
 		<script>
 			
-			var Horizon = require('Horizon').getInstance();
+			var $ = quark.$,
+				$$ = quark.$$;
 			
-			Horizon.wheel(quark.$('.block').node, function(args) {
+			Horizon.wheel($('.block').node, function(args) {
 				return {
 					background: 'hsla('+(args.y/10)+',50%,50%,0.3)'
 				};

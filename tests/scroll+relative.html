@@ -18,18 +18,18 @@
 				opacity: 0;
 			}
 		</style>
-		<script src="../node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/Horizon.min.js"></script>
-		<script src="../build/Scroll.min.js"></script>
+		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="../build/minified/Horizon.min.js"></script>
+		<script src="../build/minified/Scroll.min.js"></script>
 	</head>
 	<body>
 		<div class="block"></div>
 		<script>
 			
-			var Horizon = require('Horizon').getInstance();
-			Horizon.detectLayout();
+			var $ = quark.$,
+				$$ = quark.$$;
 			
-			Horizon.scroll(quark.$('.block').node, function(args) {
+			Horizon.scroll($('.block').node, function(args) {
 				var interpolations = {};
 				interpolations[args.centerY - 300] = {scaleX: 1, opacity: 0};
 				interpolations[args.centerY] = {scaleX: 5, opacity: 1};

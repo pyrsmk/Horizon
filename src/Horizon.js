@@ -1,10 +1,9 @@
 /*! Horizon 2.0.0 (https://github.com/pyrsmk/Horizon) */
 
-import '../bower_components/gsap/src/uncompressed/TweenLite.js';
-import '../bower_components/gsap/src/uncompressed/plugins/CSSPlugin.js';
-import '../bower_components/gsap/src/uncompressed/easing/EasePack.js';
-
-var W = require('W');
+import '../node_modules/gsap/src/uncompressed/TweenLite.js';
+import '../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js';
+import '../node_modules/gsap/src/uncompressed/easing/EasePack.js';
+var W = require('../node_modules/pyrsmk-w/W.min.js');
 
 /*
 	Horizon class
@@ -15,7 +14,6 @@ class Horizon {
 		Constructor
 	*/
 	constructor() {
-		this.instance = this;
 		this.x = 0;
 		this.y = 0;
 		this.z = 0;
@@ -41,16 +39,6 @@ class Horizon {
 			that.detectLayout();
 			that.detectOrientation();
 		});
-	}
-
-	/*
-		Get singleton instance
-	*/
-	static getInstance() {
-		if(!this.instance) {
-			this.instance = new Horizon();
-		}
-		return this.instance;
 	}
 	
 	/*
@@ -217,7 +205,10 @@ class Horizon {
 							if(type == 'unit') {
 								continue;
 							}
-							if(this.regex[type].test(interpolations[indexes[i]][name]) && this.regex[type].test(interpolations[indexes[i+1]][name])) {
+							if(
+								this.regex[type].test(interpolations[indexes[i]][name]) &&
+								this.regex[type].test(interpolations[indexes[i+1]][name])
+							) {
 								// Extract values
 								values1 = this.regex[type].exec(interpolations[indexes[i]][name]);
 								values2 = this.regex[type].exec(interpolations[indexes[i+1]][name]);
@@ -228,10 +219,22 @@ class Horizon {
 								for(let k=0, l=values1.length; k<l; ++k) {
 									if(typeof values1[k] != 'undefined' && typeof values2[k] != 'undefined') {
 										if(type == 'hexa') {
-											values3.push(this._interpolateValue(parseInt(values1[k],16), parseInt(values2[k],16), indexes[i], indexes[i+1], position));
+											values3.push(this._interpolateValue(
+												parseInt(values1[k],16),
+												parseInt(values2[k],16),
+												indexes[i],
+												indexes[i+1],
+												position
+											));
 										}
 										else {
-											values3.push(this._interpolateValue(values1[k], values2[k], indexes[i], indexes[i+1], position));
+											values3.push(this._interpolateValue(
+												values1[k],
+												values2[k],
+												indexes[i],
+												indexes[i+1],
+												position
+											));
 										}
 									}
 								}
@@ -460,7 +463,7 @@ class Horizon {
 			}
 		}
 		// Update scene position
-		this.x = Math.abs(args.x); // abs() only used for swipe...
+		this.x = Math.abs(args.x); // abs() especially needed by Swipe
 		this.y = Math.abs(args.y);
 		this.z = Math.abs(args.z);
 	}
@@ -509,8 +512,10 @@ class Horizon {
 	*/
 	_requestAnimationFrame(func) {
 		if(!('requestAnimationFrame' in window)) {
-			window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||
-											window.msRequestAnimationFrame || function(func) { func(); };
+			window.requestAnimationFrame = window.mozRequestAnimationFrame ||
+											window.webkitRequestAnimationFrame ||
+											window.msRequestAnimationFrame ||
+											function(func) { func(); };
 		}
 		window.requestAnimationFrame(func);
 	}

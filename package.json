@@ -1,38 +1,47 @@
 {
   "name": "pyrsmk-horizon",
   "description": "2D/3D parallax library, written in ES6",
-  "version": "0.7.0",
+  "version": "2.0.0",
   "author": "Aurélien Delogu <pyrsmk@dreamysource.fr> (http://dreamysource.fr)",
   "repository": {
     "type": "git",
     "url": "https://github.com/pyrsmk/Horizon.git"
   },
-  "main": "build/Horizon.min.js",
+  "main": "build/unminified/Horizon.js",
   "keywords": [
     "parallax",
     "animation",
     "2D",
-    "3D"
+    "3D",
+	"es6",
+	  "swipe",
+	  "touch",
+	  "gyroscope",
+	  "canvas",
+	  "scroll",
+	  "mouse",
+	  "wheel"
   ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/pyrsmk/Horizon/issues",
     "email": "dev@dreamysource.fr"
   },
-  "homepage": "http://dreamysource.fr/product/Horizon",
+  "homepage": "http://horizonjs.io",
   "devDependencies": {
     "babelify": "^6.1.2",
-    "bowser": "^1.0.0",
     "browserify": "^10.2.3",
     "gulp": "^3.9.0",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.3",
     "gulp-shell": "^0.4.2",
     "gulp-uglify": "^1.2.0",
-    "merge2": "^0.3.5",
-    "pyrsmk-imagine": "^1.0.2",
-    "pyrsmk-quark": "^2.0.0",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "merge2": "^0.3.6",
+    "through2": "^2.0.0"
+  },
+  "dependencies": {
+    "gsap": "^1.18.0",
+    "impetus": "^0.8.3",
+    "pyrsmk-w": "^1.4.0"
   }
 }
