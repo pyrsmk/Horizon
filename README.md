@@ -17,7 +17,7 @@ It currently supports :
 Private/Commercial use
 ----------------------
 
-Horizon will always be free for private use. Currently, it is free for commercial too use until we launch the project website. The website will propose personal Horizon bundles, like Modernizr.
+Horizon will always be free for private use. Currently, it is free for commercial use too, until we launch the project website. The website will propose personal Horizon bundles, like Modernizr.
 
 Install
 -------
