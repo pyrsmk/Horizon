@@ -32,12 +32,12 @@ Pick Horizon and the needed plugins in the `build/` directory.
 Examples
 --------
 
-- [mouse input + background plugin](http://horizonjs.io/examples/mouse+background.html)
-- [scroll input + relative interpolations](http://horizonjs.io/examples/scroll+relative.html)
-- [swipe input + 3D](http://horizonjs.io/examples/swipe+3d.html)
-- [mouse wheel input + HSLA parallaxing](http://horizonjs.io/examples/wheel+hsla.html)
-- [gyroscope input + swipe input](http://horizonjs.io/examples/gyro+swipe.html)
-- [canvas2d + scroll input](http://horizonjs.io/examples/canvas2d+scroll.html)
+- [mouse input + background plugin](http://examples.horizonjs.io/mouse+background.html)
+- [scroll input + relative interpolations](http://examples.horizonjs.io/scroll+relative.html)
+- [swipe input + 3D](http://examples.horizonjs.io/swipe+3d.html)
+- [mouse wheel input + HSLA parallaxing](http://examples.horizonjs.io/wheel+hsla.html)
+- [gyroscope input + swipe input](http://examples.horizonjs.io/gyro+swipe.html)
+- [canvas2d + scroll input](http://examples.horizonjs.io/canvas2d+scroll.html)
 
 Basics
 ------
