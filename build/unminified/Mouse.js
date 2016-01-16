@@ -3,8 +3,6 @@ Horizon._registerPlugin('mouse', function() {
 	Horizon._listen(['mousemove'], function(e) {
 		e = e || window.event;
 		
-		//var delta = (Math.abs(Horizon.x - e.pageX) + Math.abs(Horizon.y - e.pageY)) / 150;
-		
 		Horizon.render({
 			plugin: 'mouse',
 			x: e.pageX,

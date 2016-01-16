@@ -1,5 +1,7 @@
 require('../node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js');
 
+var disable = false;
+
 Horizon._registerPlugin('scroll', function() {
 	// Define rendering function
 	var render = function() {
@@ -16,8 +18,16 @@ Horizon._registerPlugin('scroll', function() {
 		};
 	// Listen to scroll event
 	Horizon._listen(['scroll'], function(e) {
-		Horizon._requestAnimationFrame(render);
+		if(!disable) {
+			Horizon._requestAnimationFrame(render);
+		}
 	});
 }, function(args) {
-	TweenLite.to(window, 0.5, {scrollTo: args});
+	disable = true;
+	TweenLite.to(window, 0.5, {
+		scrollTo: args,
+		onComplete: function() {
+			disable = false;
+		}
+	});
 });

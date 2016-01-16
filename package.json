@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/pyrsmk/Horizon.git"
   },
-  "main": "build/unminified/Horizon.js",
+  "main": "src/Horizon.js",
   "keywords": [
     "parallax",
     "animation",

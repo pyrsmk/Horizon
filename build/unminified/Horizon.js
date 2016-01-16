@@ -1,11 +1,11 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Horizon = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 /*!
- * VERSION: 1.18.0
- * DATE: 2015-09-03
+ * VERSION: 1.18.2
+ * DATE: 2015-12-22
  * UPDATES AND DOCS AT: http://greensock.com
  *
- * @license Copyright (c) 2008-2015, GreenSock. All rights reserved.
+ * @license Copyright (c) 2008-2016, GreenSock. All rights reserved.
  * This work is subject to the terms at http://greensock.com/standard-license or for
  * Club GreenSock members, the software agreement that was issued with your membership.
  * 
@@ -289,7 +289,7 @@
 		_class("Ticker", function(fps, useRAF) {
 			var _self = this,
 				_startTime = _getTime(),
-				_useRAF = (useRAF !== false && _reqAnimFrame),
+				_useRAF = (useRAF !== false && _reqAnimFrame) ? "auto" : false,
 				_lagThreshold = 500,
 				_adjustedLag = 33,
 				_tickWord = "tick", //helps reduce gc burden
@@ -343,9 +343,11 @@
 				}
 			};
 
-			_self.wake = function() {
+			_self.wake = function(seamless) {
 				if (_id !== null) {
 					_self.sleep();
+				} else if (seamless) {
+					_startTime += -_lastUpdate + (_lastUpdate = _getTime());
 				} else if (_self.frame > 10) { //don't trigger lagSmoothing if we're just waking up, and make sure that at least 10 frames have elapsed because of the iOS bug that we work around below with the 1.5-second setTimout().
 					_lastUpdate = _getTime() - _lagThreshold + 5;
 				}
@@ -378,7 +380,7 @@
 
 			//a bug in iOS 6 Safari occasionally prevents the requestAnimationFrame from working initially, so we use a 1.5-second timeout that automatically falls back to setTimeout() if it senses this condition.
 			setTimeout(function() {
-				if (_useRAF && _self.frame < 5) {
+				if (_useRAF === "auto" && _self.frame < 5 && document.visibilityState !== "hidden") {
 					_self.useRAF(false);
 				}
 			}, 1500);
@@ -925,7 +927,7 @@
 		p._firstPT = p._targets = p._overwrittenProps = p._startAt = null;
 		p._notifyPluginsOfEnabled = p._lazy = false;
 
-		TweenLite.version = "1.18.0";
+		TweenLite.version = "1.18.2";
 		TweenLite.defaultEase = p._ease = new Ease(null, null, 1, 1);
 		TweenLite.defaultOverwrite = "auto";
 		TweenLite.ticker = _ticker;
@@ -1039,7 +1041,8 @@
 						blob = _blobDif(s, end, stringFilter || TweenLite.defaultStringFilter, pt);
 						pt = {t:blob, p:"setRatio", s:0, c:1, f:2, pg:0, n:overwriteProp || prop, pr:0}; //"2" indicates it's a Blob property tween. Needed for RoundPropsPlugin for example.
 					} else if (!isRelative) {
-						pt.c = (parseFloat(end) - parseFloat(s)) || 0;
+						pt.s = parseFloat(s);
+						pt.c = (parseFloat(end) - pt.s) || 0;
 					}
 				}
 				if (pt.c) { //only add it to the linked list if there's a change.
@@ -1384,7 +1387,7 @@
 				duration = this._duration,
 				prevRawPrevTime = this._rawPrevTime,
 				isComplete, callback, pt, rawPrevTime;
-			if (time >= duration) {
+			if (time >= duration - 0.0000001) { //to work around occasional floating point math artifacts.
 				this._totalTime = this._time = duration;
 				this.ratio = this._ease._calcEnd ? this._ease.getRatio(1) : 1;
 				if (!this._reversed ) {
@@ -1396,7 +1399,7 @@
 					if (this._startTime === this._timeline._duration) { //if a zero-duration tween is at the VERY end of a timeline and that timeline renders at its end, it will typically add a tiny bit of cushion to the render time to prevent rounding errors from getting in the way of tweens rendering their VERY end. If we then reverse() that timeline, the zero-duration tween will trigger its onReverseComplete even though technically the playhead didn't pass over it again. It's a very specific edge case we must accommodate.
 						time = 0;
 					}
-					if (time === 0 || prevRawPrevTime < 0 || (prevRawPrevTime === _tinyNum && this.data !== "isPause")) if (prevRawPrevTime !== time) { //note: when this.data is "isPause", it's a callback added by addPause() on a timeline that we should not be triggered when LEAVING its exact start time. In other words, tl.addPause(1).play(1) shouldn't pause.
+					if (prevRawPrevTime < 0 || (time <= 0 && time >= -0.0000001) || (prevRawPrevTime === _tinyNum && this.data !== "isPause")) if (prevRawPrevTime !== time) { //note: when this.data is "isPause", it's a callback added by addPause() on a timeline that we should not be triggered when LEAVING its exact start time. In other words, tl.addPause(1).play(1) shouldn't pause.
 						force = true;
 						if (prevRawPrevTime > _tinyNum) {
 							callback = "onReverseComplete";
@@ -1889,11 +1892,11 @@
 },{}],2:[function(require,module,exports){
 (function (global){
 /*!
- * VERSION: beta 1.15.2
- * DATE: 2015-01-27
+ * VERSION: 1.15.3
+ * DATE: 2015-12-22
  * UPDATES AND DOCS AT: http://greensock.com
  *
- * @license Copyright (c) 2008-2015, GreenSock. All rights reserved.
+ * @license Copyright (c) 2008-2016, GreenSock. All rights reserved.
  * This work is subject to the terms at http://greensock.com/standard-license or for
  * Club GreenSock members, the software agreement that was issued with your membership.
  * 
@@ -2233,15 +2236,29 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 	}, true);
 
 }); if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); }
+
+//export to AMD/RequireJS and CommonJS/Node (precursor to full modular build system coming at a later date)
+(function() {
+	"use strict";
+	var getGlobal = function() {
+		return (_gsScope.GreenSockGlobals || _gsScope);
+	};
+	if (typeof(define) === "function" && define.amd) { //AMD
+		define(["TweenLite"], getGlobal);
+	} else if (typeof(module) !== "undefined" && module.exports) { //node
+		require("../TweenLite.js");
+		module.exports = getGlobal();
+	}
+}());
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
+},{"../TweenLite.js":1}],3:[function(require,module,exports){
 (function (global){
 /*!
- * VERSION: 1.18.0
- * DATE: 2015-09-05
+ * VERSION: 1.18.2
+ * DATE: 2015-12-22
  * UPDATES AND DOCS AT: http://greensock.com
  *
- * @license Copyright (c) 2008-2015, GreenSock. All rights reserved.
+ * @license Copyright (c) 2008-2016, GreenSock. All rights reserved.
  * This work is subject to the terms at http://greensock.com/standard-license or for
  * Club GreenSock members, the software agreement that was issued with your membership.
  * 
@@ -2269,7 +2286,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			p = CSSPlugin.prototype = new TweenPlugin("css");
 
 		p.constructor = CSSPlugin;
-		CSSPlugin.version = "1.18.0";
+		CSSPlugin.version = "1.18.2";
 		CSSPlugin.API = 2;
 		CSSPlugin.defaultTransformPerspective = 0;
 		CSSPlugin.defaultSkewType = "compensated";
@@ -2750,7 +2767,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 				return parsed;
 			},
-			_colorExp = "(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#.+?\\b"; //we'll dynamically build this Regular Expression to conserve file size. After building it, it will be able to find rgb(), rgba(), # (hexadecimal), and named color values like red, blue, purple, etc.
+			_colorExp = "(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#(?:[0-9a-f]{3}){1,2}\\b"; //we'll dynamically build this Regular Expression to conserve file size. After building it, it will be able to find rgb(), rgba(), # (hexadecimal), and named color values like red, blue, purple, etc.
 
 		for (p in _colorLookup) {
 			_colorExp += "|" + p + "\\b";
@@ -2867,7 +2884,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					proxy = d.proxy,
 					mpt = d.firstMPT,
 					min = 0.000001,
-					val, pt, i, str;
+					val, pt, i, str, p;
 				while (mpt) {
 					val = proxy[mpt.v];
 					if (mpt.r) {
@@ -2881,19 +2898,20 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (d.autoRotate) {
 					d.autoRotate.rotation = proxy.rotation;
 				}
-				//at the end, we must set the CSSPropTween's "e" (end) value dynamically here because that's what is used in the final setRatio() method.
-				if (v === 1) {
+				//at the end, we must set the CSSPropTween's "e" (end) value dynamically here because that's what is used in the final setRatio() method. Same for "b" at the beginning.
+				if (v === 1 || v === 0) {
 					mpt = d.firstMPT;
+					p = (v === 1) ? "e" : "b";
 					while (mpt) {
 						pt = mpt.t;
 						if (!pt.type) {
-							pt.e = pt.s + pt.xs0;
+							pt[p] = pt.s + pt.xs0;
 						} else if (pt.type === 1) {
 							str = pt.xs0 + pt.s + pt.xs1;
 							for (i = 1; i < pt.l; i++) {
 								str += pt["xn"+i] + pt["xs"+(i+1)];
 							}
-							pt.e = str;
+							pt[p] = str;
 						}
 						mpt = mpt._next;
 					}
@@ -3119,7 +3137,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 						//if no number is found, treat it as a non-tweening value and just append the string to the current xs.
 						if (!bnums) {
-							pt["xs" + pt.l] += pt.l ? " " + bv : bv;
+							pt["xs" + pt.l] += pt.l ? " " + ev : ev;
 
 						//loop through all the numbers that are found and construct the extra values on the pt.
 						} else {
@@ -3564,7 +3582,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 							a32 = t3;
 						}
 						//rotationY
-						angle = Math.atan2(a13, a33);
+						angle = Math.atan2(-a31, a33);
 						tm.rotationY = angle * _RAD2DEG;
 						if (angle) {
 							cos = Math.cos(-angle);
@@ -3594,7 +3612,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 						if (tm.rotationX && Math.abs(tm.rotationX) + Math.abs(tm.rotation) > 359.9) { //when rotationY is set, it will often be parsed as 180 degrees different than it should be, and rotationX and rotation both being 180 (it looks the same), so we adjust for that here.
 							tm.rotationX = tm.rotation = 0;
-							tm.rotationY += 180;
+							tm.rotationY = 180 - tm.rotationY;
 						}
 
 						tm.scaleX = ((Math.sqrt(a11 * a11 + a21 * a21) * rnd + 0.5) | 0) / rnd;
@@ -3777,7 +3795,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					a11, a12, a13, a21, a22, a23, a31, a32, a33, a41, a42, a43,
 					zOrigin, min, cos, sin, t1, t2, transform, comma, zero, skew, rnd;
 				//check to see if we should render as 2D (and SVGs must use 2D when _useSVGTransformAttr is true)
-				if (((((v === 1 || v === 0) && force3D === "auto" && (this.tween._totalTime === this.tween._totalDuration || !this.tween._totalTime)) || !force3D) && !z && !perspective && !rotationY && !rotationX) || (_useSVGTransformAttr && isSVG) || !_supports3D) { //on the final render (which could be 0 for a from tween), if there are no 3D aspects, render in 2D to free up memory and improve performance especially on mobile devices. Check the tween's totalTime/totalDuration too in order to make sure it doesn't happen between repeats if it's a repeating tween.
+				if (((((v === 1 || v === 0) && force3D === "auto" && (this.tween._totalTime === this.tween._totalDuration || !this.tween._totalTime)) || !force3D) && !z && !perspective && !rotationY && !rotationX && sz === 1) || (_useSVGTransformAttr && isSVG) || !_supports3D) { //on the final render (which could be 0 for a from tween), if there are no 3D aspects, render in 2D to free up memory and improve performance especially on mobile devices. Check the tween's totalTime/totalDuration too in order to make sure it doesn't happen between repeats if it's a repeating tween.
 
 					//2D
 					if (angle || t.skewX || isSVG) {
@@ -3967,7 +3985,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				transform = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix3d(" : "matrix3d(");
 				transform += ((a11 < min && a11 > -min) ? zero : a11) + comma + ((a21 < min && a21 > -min) ? zero : a21) + comma + ((a31 < min && a31 > -min) ? zero : a31);
 				transform += comma + ((a41 < min && a41 > -min) ? zero : a41) + comma + ((a12 < min && a12 > -min) ? zero : a12) + comma + ((a22 < min && a22 > -min) ? zero : a22);
-				if (rotationX || rotationY) { //performance optimization (often there's no rotationX or rotationY, so we can skip these calculations)
+				if (rotationX || rotationY || sz !== 1) { //performance optimization (often there's no rotationX or rotationY, so we can skip these calculations)
 					transform += comma + ((a32 < min && a32 > -min) ? zero : a32) + comma + ((a42 < min && a42 > -min) ? zero : a42) + comma + ((a13 < min && a13 > -min) ? zero : a13);
 					transform += comma + ((a23 < min && a23 > -min) ? zero : a23) + comma + ((a33 < min && a33 > -min) ? zero : a33) + comma + ((a43 < min && a43 > -min) ? zero : a43) + comma;
 				} else {
@@ -4410,6 +4428,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					if (transform) {
 						if (transform.svg) {
 							this.t.removeAttribute("data-svg-origin");
+							this.t.removeAttribute("transform");
 						}
 						delete this.t._gsTransform;
 					}
@@ -4610,7 +4629,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 									bs = bn + "%";
 								}
 
-							} else if (esfx === "em" || esfx === "rem") {
+							} else if (esfx === "em" || esfx === "rem" || esfx === "vw" || esfx === "vh") {
 								bn /= _convertToPixels(target, p, 1, esfx);
 
 							//otherwise convert to pixels.
@@ -4915,7 +4934,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../TweenLite.js":1}],4:[function(require,module,exports){
-!function(t,e){"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?module.exports=e():t.W=e()}(this,function(){function t(){return"orientation"in window?window.orientation?"landscape":"portrait":document.documentElement.clientWidth>document.documentElement.clientHeight?"landscape":"portrait"}function e(e){var n,i,o,r,h=[{width:screen.availWidth,height:screen.availHeight},{width:window.outerWidth,height:window.outerHeight},{width:window.innerWidth,height:window.innerHeight}];if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)&&"landscape"==t()?(n=screen.height,i=screen.width,h[2].width=n):(n=screen.width,i=screen.height),e)return{width:n,height:i};for(o=0,r=h.length;r>o;++o)h[o].width>n||h[o].height>i||!h[o].width||!h[o].height?h[o].note=0:h[o].note=n-h[o].width+(i-h[o].height);return h.sort(function(t,e){return e.note-t.note}),{width:h[0].width,height:h[0].height}}var n=[],i=!1;return window.addEventListener?"onorientationchange"in window?window.addEventListener("orientationchange",function(){i=!0},!1):window.addEventListener("resize",function(){i=!0},!1):window.attachEvent("onresize",function(){i=!0}),setInterval(function(){if(i&&document.documentElement.clientWidth){for(var t=0,e=n.length;e>t;++t)n[t].func();i=!1}},10),{getViewportWidth:function(t){return e(t).width},getViewportHeight:function(t){return e(t).height},getOrientation:function(){return t()},addListener:function(t,e){return n.push({func:t,key:e}),t},removeListener:function(t){for(var e=0,i=n.length;i>e;++e)if(n[e].key==t){n.splice(e,1);break}}}});
+!function(t,e){"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?module.exports=e():t.W=e()}(this,function(){function t(){return"orientation"in window?window.orientation?"landscape":"portrait":document.documentElement.clientWidth>document.documentElement.clientHeight?"landscape":"portrait"}function e(e){var n,i,o,r,h=[{width:screen.availWidth,height:screen.availHeight},{width:window.outerWidth,height:window.outerHeight},{width:window.innerWidth,height:window.innerHeight}];if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)&&"landscape"==t()?(n=screen.height,i=screen.width,h[2].width=n):(n=screen.width,i=screen.height),e)return{width:n,height:i};for(o=0,r=h.length;r>o;++o)h[o].width>n||h[o].height>i||!h[o].width||!h[o].height?h[o].note=0:h[o].note=n-h[o].width+(i-h[o].height);return h.sort(function(t,e){return e.note-t.note}),{width:h[0].width,height:h[0].height}}var n=[],i=!1;window.addEventListener?"onorientationchange"in window?window.addEventListener("orientationchange",function(){i=!0},!1):window.addEventListener("resize",function(){i=!0},!1):window.attachEvent("onresize",function(){i=!0}),setInterval(function(){if(i&&document.documentElement.clientWidth){for(var t=0,e=n.length;e>t;++t)n[t].func();i=!1}},10);var o={getViewportWidth:function(t){return e(t).width},getViewportHeight:function(t){return e(t).height},getOrientation:function(){return t()},addListener:function(t,e){return n.push({func:t,key:e}),t},removeListener:function(t){for(var e=0,i=n.length;i>e;++e)if(n[e].key==t){n.splice(e,1);break}}};return o});
 },{}],5:[function(require,module,exports){
 /*! Horizon 2.0.0 (https://github.com/pyrsmk/Horizon) */
 

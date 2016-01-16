@@ -1,11 +1,11 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 /*!
- * VERSION: 1.7.5
- * DATE: 2015-02-26
+ * VERSION: 1.7.6
+ * DATE: 2015-12-10
  * UPDATES AND DOCS AT: http://greensock.com
  *
- * @license Copyright (c) 2008-2015, GreenSock. All rights reserved.
+ * @license Copyright (c) 2008-2016, GreenSock. All rights reserved.
  * This work is subject to the terms at http://greensock.com/standard-license or for
  * Club GreenSock members, the software agreement that was issued with your membership.
  * 
@@ -29,7 +29,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		ScrollToPlugin = _gsScope._gsDefine.plugin({
 			propName: "scrollTo",
 			API: 2,
-			version:"1.7.5",
+			version:"1.7.6",
 
 			//called when the tween renders for the first time. This is where initial values should be recorded and any setup routines should run.
 			init: function(target, value, tween) {
@@ -67,6 +67,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					yDif = y - this.yPrev,
 					xDif = x - this.xPrev;
 
+				if (this.x < 0) { //can't scroll to a position less than 0! Might happen if someone uses a Back.easeOut or Elastic.easeOut when scrolling back to the top of the page (for example)
+					this.x = 0;
+				}
+				if (this.y < 0) {
+					this.y = 0;
+				}
 				if (this._autoKill) {
 					//note: iOS has a bug that throws off the scroll by several pixels, so we need to check if it's within 7 pixels of the previous one that we set instead of just looking for an exact match.
 					if (!this.skipX && (xDif > 7 || xDif < -7) && x < _max(this._target, "x")) {
@@ -124,6 +130,8 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 },{}],2:[function(require,module,exports){
 require('../node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js');
 
+var disable = false;
+
 Horizon._registerPlugin('scroll', function() {
 	// Define rendering function
 	var render = function() {
@@ -140,9 +148,17 @@ Horizon._registerPlugin('scroll', function() {
 		};
 	// Listen to scroll event
 	Horizon._listen(['scroll'], function(e) {
-		Horizon._requestAnimationFrame(render);
+		if(!disable) {
+			Horizon._requestAnimationFrame(render);
+		}
 	});
 }, function(args) {
-	TweenLite.to(window, 0.5, {scrollTo: args});
+	disable = true;
+	TweenLite.to(window, 0.5, {
+		scrollTo: args,
+		onComplete: function() {
+			disable = false;
+		}
+	});
 });
 },{"../node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js":1}]},{},[2]);
