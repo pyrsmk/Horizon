@@ -4936,7 +4936,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 },{"../TweenLite.js":1}],4:[function(require,module,exports){
 !function(t,e){"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?module.exports=e():t.W=e()}(this,function(){function t(){return"orientation"in window?window.orientation?"landscape":"portrait":document.documentElement.clientWidth>document.documentElement.clientHeight?"landscape":"portrait"}function e(e){var n,i,o,r,h=[{width:screen.availWidth,height:screen.availHeight},{width:window.outerWidth,height:window.outerHeight},{width:window.innerWidth,height:window.innerHeight}];if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)&&"landscape"==t()?(n=screen.height,i=screen.width,h[2].width=n):(n=screen.width,i=screen.height),e)return{width:n,height:i};for(o=0,r=h.length;r>o;++o)h[o].width>n||h[o].height>i||!h[o].width||!h[o].height?h[o].note=0:h[o].note=n-h[o].width+(i-h[o].height);return h.sort(function(t,e){return e.note-t.note}),{width:h[0].width,height:h[0].height}}var n=[],i=!1;window.addEventListener?"onorientationchange"in window?window.addEventListener("orientationchange",function(){i=!0},!1):window.addEventListener("resize",function(){i=!0},!1):window.attachEvent("onresize",function(){i=!0}),setInterval(function(){if(i&&document.documentElement.clientWidth){for(var t=0,e=n.length;e>t;++t)n[t].func();i=!1}},10);var o={getViewportWidth:function(t){return e(t).width},getViewportHeight:function(t){return e(t).height},getOrientation:function(){return t()},addListener:function(t,e){return n.push({func:t,key:e}),t},removeListener:function(t){for(var e=0,i=n.length;i>e;++e)if(n[e].key==t){n.splice(e,1);break}}};return o});
 },{}],5:[function(require,module,exports){
-/*! Horizon 2.0.1 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.0.2 (https://github.com/pyrsmk/Horizon) */
 
 'use strict';
 
@@ -5334,10 +5334,6 @@ var Horizon = (function () {
 	}, {
 		key: 'render',
 		value: function render(args) {
-			// Get out!
-			if ('plugin' in args && this.disabled_plugins.indexOf(args.plugin) != -1) {
-				return;
-			}
 			// Format arguments
 			args = args || {};
 			args.x = 'x' in args ? parseInt(args.x, 10) : 0;
@@ -5368,74 +5364,76 @@ var Horizon = (function () {
 				}
 			}
 			// Generate animations
-			var options = undefined,
-			    left = undefined,
-			    top = undefined,
-			    width = undefined,
-			    height = undefined,
-			    that = this;
-			for (var plugin in this.callbacks) {
-				if (!('plugin' in args) || args.plugin == plugin) {
-					var _iteratorNormalCompletion2 = true;
-					var _didIteratorError2 = false;
-					var _iteratorError2 = undefined;
+			if (!('plugin' in args) || this.disabled_plugins.indexOf(args.plugin) == -1) {
+				var options = undefined,
+				    left = undefined,
+				    _top = undefined,
+				    width = undefined,
+				    height = undefined,
+				    that = this;
+				for (var plugin in this.callbacks) {
+					if (!('plugin' in args) || args.plugin == plugin) {
+						var _iteratorNormalCompletion2 = true;
+						var _didIteratorError2 = false;
+						var _iteratorError2 = undefined;
 
-					try {
-						for (var _iterator2 = this.callbacks[plugin][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-							var element = _step2.value;
-
-							// Define callback parameters
-							var params = {
-								x: args.x,
-								y: args.y,
-								z: args.z
-							};
-							// Define relative positions
-							left = element.node.offsetLeft;
-							top = element.node.offsetTop;
-							width = element.node.offsetWidth;
-							height = element.node.offsetHeight;
-							params.left = left;
-							params.right = left - this.viewport.width + width;
-							params.centerX = left - (this.viewport.width - width) / 2;
-							params.top = top;
-							params.bottom = top - this.viewport.height + height;
-							params.centerY = top - (this.viewport.height - height) / 2;
-							// Limit x/y to the layout boundaries
-							if (this.boundaries) {
-								if (params.x + width > this.layout.width) {
-									params.x = this.layout.width - width;
-								}
-								if (params.y + height > this.layout.height) {
-									params.y = this.layout.height - height;
-								}
-							}
-							// Populate options
-							options = element.callback(params);
-							if (!options) {
-								continue;
-							}
-							// Define animation options
-							options.autoCSS = true;
-							options.ease = options.ease || args.easing;
-							if (options.duration) {
-								args.duration = options.duration;
-								delete options.duration;
-							}
-							// Animate
-							TweenLite.to(element.node, args.duration, options);
-						}
-					} catch (err) {
-						_didIteratorError2 = true;
-						_iteratorError2 = err;
-					} finally {
 						try {
-							if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-								_iterator2['return']();
+							for (var _iterator2 = this.callbacks[plugin][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+								var element = _step2.value;
+
+								// Define callback parameters
+								var params = {
+									x: args.x,
+									y: args.y,
+									z: args.z
+								};
+								// Define relative positions
+								left = element.node.offsetLeft;
+								_top = element.node.offsetTop;
+								width = element.node.offsetWidth;
+								height = element.node.offsetHeight;
+								params.left = left;
+								params.right = left - this.viewport.width + width;
+								params.centerX = left - (this.viewport.width - width) / 2;
+								params.top = _top;
+								params.bottom = _top - this.viewport.height + height;
+								params.centerY = _top - (this.viewport.height - height) / 2;
+								// Limit x/y to the layout boundaries
+								if (this.boundaries) {
+									if (params.x + width > this.layout.width) {
+										params.x = this.layout.width - width;
+									}
+									if (params.y + height > this.layout.height) {
+										params.y = this.layout.height - height;
+									}
+								}
+								// Populate options
+								options = element.callback(params);
+								if (!options) {
+									continue;
+								}
+								// Define animation options
+								options.autoCSS = true;
+								options.ease = options.ease || args.easing;
+								if (options.duration) {
+									args.duration = options.duration;
+									delete options.duration;
+								}
+								// Animate
+								TweenLite.to(element.node, args.duration, options);
 							}
+						} catch (err) {
+							_didIteratorError2 = true;
+							_iteratorError2 = err;
 						} finally {
-							if (_didIteratorError2) {
-								throw _iteratorError2;
+							try {
+								if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+									_iterator2['return']();
+								}
+							} finally {
+								if (_didIteratorError2) {
+									throw _iteratorError2;
+								}
 							}
 						}
 					}

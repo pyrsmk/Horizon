@@ -1,4 +1,4 @@
-/*! Horizon 2.0.1 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.0.2 (https://github.com/pyrsmk/Horizon) */
 
 import '../node_modules/gsap/src/uncompressed/TweenLite.js';
 import '../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js';
@@ -378,10 +378,6 @@ class Horizon {
 			}
 	*/
 	render(args) {
-		// Get out!
-		if('plugin' in args && this.disabled_plugins.indexOf(args.plugin) != -1) {
-			return;
-		}
 		// Format arguments
 		args = args || {};
 		args.x = 'x' in args ? parseInt(args.x,10) : 0;
@@ -414,51 +410,53 @@ class Horizon {
 			}
 		}
 		// Generate animations
-		let options, left, top, width, height,
-			that = this;
-		for(let plugin in this.callbacks) {
-			if(!('plugin' in args) || args.plugin == plugin) {
-				for(let element of this.callbacks[plugin]) {
-					// Define callback parameters
-					let params = {
-						x: args.x,
-						y: args.y,
-						z: args.z
-					};
-					// Define relative positions
-					left = element.node.offsetLeft;
-					top = element.node.offsetTop;
-					width = element.node.offsetWidth;
-					height = element.node.offsetHeight;
-					params.left = left;
-					params.right = left - this.viewport.width + width;
-					params.centerX = left - ((this.viewport.width - width) / 2);
-					params.top = top;
-					params.bottom = top - this.viewport.height + height;
-					params.centerY = top - ((this.viewport.height - height) / 2);
-					// Limit x/y to the layout boundaries
-					if(this.boundaries) {
-						if((params.x + width) > this.layout.width) {
-							params.x = this.layout.width - width;
+		if(!('plugin' in args) || this.disabled_plugins.indexOf(args.plugin) == -1) {
+			let options, left, top, width, height,
+				that = this;
+			for(let plugin in this.callbacks) {
+				if(!('plugin' in args) || args.plugin == plugin) {
+					for(let element of this.callbacks[plugin]) {
+						// Define callback parameters
+						let params = {
+							x: args.x,
+							y: args.y,
+							z: args.z
+						};
+						// Define relative positions
+						left = element.node.offsetLeft;
+						top = element.node.offsetTop;
+						width = element.node.offsetWidth;
+						height = element.node.offsetHeight;
+						params.left = left;
+						params.right = left - this.viewport.width + width;
+						params.centerX = left - ((this.viewport.width - width) / 2);
+						params.top = top;
+						params.bottom = top - this.viewport.height + height;
+						params.centerY = top - ((this.viewport.height - height) / 2);
+						// Limit x/y to the layout boundaries
+						if(this.boundaries) {
+							if((params.x + width) > this.layout.width) {
+								params.x = this.layout.width - width;
+							}
+							if((params.y + height) > this.layout.height) {
+								params.y = this.layout.height - height;
+							}
 						}
-						if((params.y + height) > this.layout.height) {
-							params.y = this.layout.height - height;
+						// Populate options
+						options = element.callback(params);
+						if(!options) {
+							continue;
 						}
+						// Define animation options
+						options.autoCSS = true;
+						options.ease = options.ease || args.easing;
+						if(options.duration) {
+							args.duration = options.duration;
+							delete options.duration;
+						}
+						// Animate
+						TweenLite.to(element.node, args.duration, options);
 					}
-					// Populate options
-					options = element.callback(params);
-					if(!options) {
-						continue;
-					}
-					// Define animation options
-					options.autoCSS = true;
-					options.ease = options.ease || args.easing;
-					if(options.duration) {
-						args.duration = options.duration;
-						delete options.duration;
-					}
-					// Animate
-					TweenLite.to(element.node, args.duration, options);
 				}
 			}
 		}
