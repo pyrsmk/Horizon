@@ -1,4 +1,4 @@
-Horizon 2.0.0
+Horizon 2.0.1
 =============
 
 Horizon is an ES6 parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
