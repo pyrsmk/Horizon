@@ -1,4 +1,4 @@
-/*! Horizon 2.0.2 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.0.3 (https://github.com/pyrsmk/Horizon) */
 
 import '../node_modules/gsap/src/uncompressed/TweenLite.js';
 import '../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js';
@@ -124,7 +124,9 @@ class Horizon {
 			String name
 	*/
 	disablePlugin(name) {
-		this.disabled_plugins.push(name);
+		if(this.disabled_plugins.indexOf(name) == -1) {
+			this.disabled_plugins.push(name);
+		}
 	}
 	
 	/*
