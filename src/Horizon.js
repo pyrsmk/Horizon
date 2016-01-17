@@ -1,4 +1,4 @@
-/*! Horizon 2.0.3 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.0.4 (https://github.com/pyrsmk/Horizon) */
 
 import '../node_modules/gsap/src/uncompressed/TweenLite.js';
 import '../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js';
