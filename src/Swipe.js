@@ -23,11 +23,14 @@ Horizon._registerPlugin('swipe', function(options) {
 	Horizon._addCSSRule('body', 'cursor: all-scroll; cursor: -moz-grab; cursor: -webkit-grab; cursor: grab;');
 	Horizon._addCSSRule('body:active', 'cursor: -moz-grabbing; cursor: -webkit-grabbing; cursor: grabbing;');
 }, function(args) {
+	args.render = 'render' in args ? args.render : false;
 	impetus.setValues(args.x, args.y);
-	Horizon.render({
-		plugin: 'swipe',
-		x: args.x,
-		y: args.y,
-		duration: 0.25
-	});
+	if(args.render) {
+		Horizon.render({
+			plugin: 'swipe',
+			x: args.x,
+			y: args.y,
+			duration: 0.25
+		});
+	}
 });
