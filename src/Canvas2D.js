@@ -10,15 +10,25 @@ Horizon._registerPlugin('canvas2d', function() {
 			// Draw images
 			for(var i=0, j=images.length; i<j; ++i) {
 				// Get out!
-				if(!images[i] || typeof images[i] != 'object' || !('nodeName' in images[i]) || images[i].nodeName != 'IMG') {
+				if(
+					!images[i] ||
+					typeof images[i] != 'object' ||
+					!('nodeName' in images[i]) ||
+					images[i].nodeName != 'IMG' ||
+					!('canvas2d' in images[i])
+				) {
 					continue;
+				}
+				// Pre-render image
+				if(!('cache' in images[i])) {
+					var c = document.createElement('canvas');
+					c.width = images[i].width;
+					c.height = images[i].height;
+					c.getContext('2d').drawImage(images[i], 0, 0);
+					images[i].cache = c;
 				}
 				// Save state
 				canvas2d.save();
-				// Invalid
-				if(!('canvas2d' in images[i])) {
-					continue;
-				}
 				// Scale image
 				if('scale' in images[i].canvas2d) {
 					canvas2d.scale(images[i].canvas2d.scale.x, images[i].canvas2d.scale.y);
@@ -37,7 +47,7 @@ Horizon._registerPlugin('canvas2d', function() {
 				}
 				// Draw image
 				canvas2d.drawImage(
-					images[i],
+					images[i].cache,
 					images[i].canvas2d.left,
 					images[i].canvas2d.top
 				);
