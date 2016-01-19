@@ -1,6 +1,6 @@
 Horizon._registerPlugin('background', function() {
 	// Override background()
-	Horizon.__proto__.background = function(node, url, size) {
+	Horizon.background = function(node, url, size) {
 		size = size || 105;
 		node.style.backgroundImage = 'url(' + url + ')';
 		node.style.backgroundSize = size + '%';

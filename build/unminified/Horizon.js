@@ -4936,538 +4936,520 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 },{"../TweenLite.js":1}],4:[function(require,module,exports){
 !function(t,e){"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?module.exports=e():t.W=e()}(this,function(){function t(){return"orientation"in window?window.orientation?"landscape":"portrait":document.documentElement.clientWidth>document.documentElement.clientHeight?"landscape":"portrait"}function e(e){var n,i,o,r,h=[{width:screen.availWidth,height:screen.availHeight},{width:window.outerWidth,height:window.outerHeight},{width:window.innerWidth,height:window.innerHeight}];if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)&&"landscape"==t()?(n=screen.height,i=screen.width,h[2].width=n):(n=screen.width,i=screen.height),e)return{width:n,height:i};for(o=0,r=h.length;r>o;++o)h[o].width>n||h[o].height>i||!h[o].width||!h[o].height?h[o].note=0:h[o].note=n-h[o].width+(i-h[o].height);return h.sort(function(t,e){return e.note-t.note}),{width:h[0].width,height:h[0].height}}var n=[],i=!1;window.addEventListener?"onorientationchange"in window?window.addEventListener("orientationchange",function(){i=!0},!1):window.addEventListener("resize",function(){i=!0},!1):window.attachEvent("onresize",function(){i=!0}),setInterval(function(){if(i&&document.documentElement.clientWidth){for(var t=0,e=n.length;e>t;++t)n[t].func();i=!1}},10);var o={getViewportWidth:function(t){return e(t).width},getViewportHeight:function(t){return e(t).height},getOrientation:function(){return t()},addListener:function(t,e){return n.push({func:t,key:e}),t},removeListener:function(t){for(var e=0,i=n.length;i>e;++e)if(n[e].key==t){n.splice(e,1);break}}};return o});
 },{}],5:[function(require,module,exports){
-/*! Horizon 2.0.8 (https://github.com/pyrsmk/Horizon) */
-
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-	value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+/*! Horizon 2.1.0 (https://github.com/pyrsmk/Horizon) */
 
 require('../node_modules/gsap/src/uncompressed/TweenLite.js');
-
 require('../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js');
-
 require('../node_modules/gsap/src/uncompressed/easing/EasePack.js');
-
 var W = require('../node_modules/pyrsmk-w/W.min.js');
 
+var Horizon = {};
+
 /*
-	Horizon class
+	Detect the viewport dimensions
 */
+Horizon.detectViewport = function() {
+	Horizon.viewport.width = W.getViewportWidth();
+	Horizon.viewport.height = W.getViewportHeight();
+};
 
-var Horizon = (function () {
+/*
+	Detect the layout dimensions
+*/
+Horizon.detectLayout = function() {
+	Horizon.layout.width = Math.max(
+		document.body ? document.body.scrollWidth : 0,
+		document.body ? document.body.offsetWidth : 0,
+		document.documentElement.clientWidth,
+		document.documentElement.scrollWidth,
+		document.documentElement.offsetWidth
+	);
+	Horizon.layout.height = Math.max(
+		document.body ? document.body.scrollHeight : 0,
+		document.body ? document.body.offsetHeight : 0,
+		document.documentElement.clientHeight,
+		document.documentElement.scrollHeight,
+		document.documentElement.offsetHeight
+	);
+};
 
-	/*
- 	Constructor
- */
+/*
+	Detect device orientation
+*/
+Horizon.detectOrientation = function() {
+	Horizon.orientation = W.getOrientation();
+};
 
-	function Horizon() {
-		_classCallCheck(this, Horizon);
+/*
+	Register a plugin
 
-		this.x = 0;
-		this.y = 0;
-		this.z = 0;
-		this.callbacks = {};
-		this.plugins = {};
-		this.disabled_plugins = [];
-		this.viewport = { width: 0, height: 0 };
-		this.layout = { width: 0, height: 0 };
-		this.orientation = 'landscape';
-		this.boundaries = false;
-		this.regex = {
-			unit: /(\d+(?:\.\d+)?)([a-z]+|%)/i,
-			list: /^(?:\s*([\w.]+)\s*)(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?$/,
-			hexa: /#(\w{2})(\w{2})(\w{2})/i,
-			rgba: /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-			hsla: /hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/
-		};
-		this.detectViewport();
-		this.detectLayout();
-		var that = this;
-		W.addListener(function () {
-			that.detectViewport();
-			that.detectLayout();
-			that.detectOrientation();
+	Parameters
+		String name
+		Function constructor
+		Function setter
+*/
+Horizon._registerPlugin = function(name, constructor, setter) {
+	constructor.loaded = false;
+	Horizon.plugins[name] = {
+		constructor: constructor,
+		setter: setter
+	};
+	Horizon[name] = function(node, callback) {
+		Horizon.initPlugin(name);
+		if(!(name in Horizon.callbacks)) {
+			Horizon.callbacks[name] = [];
+		}
+		Horizon.callbacks[name].push({
+			node: node,
+			callback: callback
 		});
+	};
+};
+
+/*
+	Initialize a plugin
+
+	Parameters
+		String name
+		Object options
+*/
+Horizon.initPlugin = function(name, options) {
+	if(!Horizon.plugins[name].loaded) {
+		Horizon.plugins[name].constructor(options);
+		Horizon.plugins[name].loaded = true;
 	}
+};
 
-	/*
- 	Detect the viewport dimensions
- */
+/*
+	Disable a plugin from rendering
 
-	_createClass(Horizon, [{
-		key: 'detectViewport',
-		value: function detectViewport() {
-			this.viewport.width = W.getViewportWidth();
-			this.viewport.height = W.getViewportHeight();
+	Parameters
+		String name
+*/
+Horizon.disablePlugin = function(name) {
+	if(Horizon.disabled_plugins.indexOf(name) == -1) {
+		Horizon.disabled_plugins.push(name);
+	}
+};
+
+/*
+	Enable a plugin that has been previously disabled
+
+	Parameters
+		String name
+*/
+Horizon.enablePlugin = function(name) {
+	Horizon.disabled_plugins.splice(Horizon.disabled_plugins.indexOf(name), 1);
+};
+
+/*
+	Set coords for the specified plugin
+
+	Parameters
+		String name
+		Object options
+*/
+Horizon.setXY = function(name, options) {
+	if(typeof Horizon.plugins[name].setter == 'function') {
+		Horizon.plugins[name].setter(options);
+	}
+};
+
+/*
+	Add a parallax animation
+
+	Parameters
+		Array plugins
+		Object node
+		Function callback
+*/
+Horizon.parallax = function(plugins, node, callback) {
+	for(var i=0, j=plugins.length; i<j; ++i) {
+		if(!(plugins[i] in Horizon)) {
+			throw new Error("'"+plugins[i]+"' plugin is not registered");
 		}
+		Horizon[plugins[i]](node, callback);
+	}
+};
 
-		/*
-  	Detect the layout dimensions
-  */
-	}, {
-		key: 'detectLayout',
-		value: function detectLayout() {
-			this.layout.width = Math.max(document.body ? document.body.scrollWidth : 0, document.body ? document.body.offsetWidth : 0, document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);
-			this.layout.height = Math.max(document.body ? document.body.scrollHeight : 0, document.body ? document.body.offsetHeight : 0, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);
-		}
+/*
+	Interpolate a value
 
-		/*
-  	Detect device orientation
-  */
-	}, {
-		key: 'detectOrientation',
-		value: function detectOrientation() {
-			this.orientation = W.getOrientation();
-		}
+	Parameters
+		Number position
+		Object interpolations
 
-		/*
-  	Register a plugin
-  	
-  	Parameters
-  		String name
-  		Function constructor
-  		Function setter
-  */
-	}, {
-		key: '_registerPlugin',
-		value: function _registerPlugin(name, constructor, setter) {
-			constructor.loaded = false;
-			this.plugins[name] = {
-				constructor: constructor,
-				setter: setter
-			};
-			var that = this;
-			this.__proto__[name] = function (node, callback) {
-				that.initPlugin(name);
-				if (!(name in this.callbacks)) {
-					this.callbacks[name] = [];
+	Return
+		Object
+*/
+Horizon.interpolate = function(position, interpolations) {
+	// Get indexes
+	var indexes = Object.keys(interpolations).sort(function(a, b) {
+		return a - b;
+	});
+	// Compute values
+	var properties = {},
+		values1,
+		values2,
+		values3;
+	for(var i=0, j=indexes.length; i<j; ++i) {
+		// We found 2 available points
+		if(i + 1 < j) {
+			// First element
+			if(i == 0 && position <= indexes[i]) {
+				for(var name in interpolations[indexes[i]]) {
+					properties[name] = interpolations[indexes[i]][name];
 				}
-				this.callbacks[name].push({
-					node: node,
-					callback: callback
-				});
-			};
-		}
-
-		/*
-  	Initialize a plugin
-  	
-  	Parameters
-  		String name
-  		Object options
-  */
-	}, {
-		key: 'initPlugin',
-		value: function initPlugin(name, options) {
-			if (!this.plugins[name].loaded) {
-				this.plugins[name].constructor(options);
-				this.plugins[name].loaded = true;
+				break;
 			}
-		}
-
-		/*
-  	Disable a plugin from rendering
-  	
-  	Parameters
-  		String name
-  */
-	}, {
-		key: 'disablePlugin',
-		value: function disablePlugin(name) {
-			if (this.disabled_plugins.indexOf(name) == -1) {
-				this.disabled_plugins.push(name);
-			}
-		}
-
-		/*
-  	Enable a plugin that has been previously disabled
-  	
-  	Parameters
-  		String name
-  */
-	}, {
-		key: 'enablePlugin',
-		value: function enablePlugin(name) {
-			this.disabled_plugins.splice(this.disabled_plugins.indexOf(name), 1);
-		}
-
-		/*
-  	Set coords for the specified plugin
-  	
-  	Parameters
-  		String name
-  		Object options
-  */
-	}, {
-		key: 'setXY',
-		value: function setXY(name, options) {
-			if (typeof this.plugins[name].setter == 'function') {
-				this.plugins[name].setter(options);
-			}
-		}
-
-		/*
-  	Add a parallax animation
-  	
-  	Parameters
-  		Array plugins
-  		Object node
-  		Function callback
-  */
-	}, {
-		key: 'parallax',
-		value: function parallax(plugins, node, callback) {
-			for (var i = 0, j = plugins.length; i < j; ++i) {
-				if (!(plugins[i] in this)) {
-					throw new Error("'" + plugins[i] + "' plugin is not registered");
-				}
-				this[plugins[i]](node, callback);
-			}
-		}
-
-		/*
-  	Interpolate a value
-  	
-  	Parameters
-  		Number position
-  		Object interpolations
-  	
-  	Return
-  		Object
-  */
-	}, {
-		key: 'interpolate',
-		value: function interpolate(position, interpolations) {
-			// Get indexes
-			var indexes = Object.keys(interpolations).sort(function (a, b) {
-				return a - b;
-			});
-			// Compute values
-			var properties = {},
-			    values1 = undefined,
-			    values2 = undefined,
-			    values3 = undefined;
-			for (var i = 0, j = indexes.length; i < j; ++i) {
-				// We found 2 available points
-				if (i + 1 < j) {
-					// First element
-					if (i == 0 && position <= indexes[i]) {
-						for (var _name in interpolations[indexes[i]]) {
-							properties[_name] = interpolations[indexes[i]][_name];
+			// Next elements
+			if(position >= indexes[i] && position <= indexes[i+1]) {
+				for(var name in interpolations[indexes[i]]) {
+					// Apply interpolations
+					for(var type in Horizon.regex) {
+						if(type == 'unit') {
+							continue;
 						}
-						break;
-					}
-					// Next elements
-					if (position >= indexes[i] && position <= indexes[i + 1]) {
-						for (var _name2 in interpolations[indexes[i]]) {
-							// Apply interpolations
-							for (var type in this.regex) {
-								if (type == 'unit') {
-									continue;
-								}
-								if (this.regex[type].test(interpolations[indexes[i]][_name2]) && this.regex[type].test(interpolations[indexes[i + 1]][_name2])) {
-									// Extract values
-									values1 = this.regex[type].exec(interpolations[indexes[i]][_name2]);
-									values2 = this.regex[type].exec(interpolations[indexes[i + 1]][_name2]);
-									values1.shift();
-									values2.shift();
-									// Interpolate values
-									values3 = [];
-									for (var k = 0, l = values1.length; k < l; ++k) {
-										if (typeof values1[k] != 'undefined' && typeof values2[k] != 'undefined') {
-											if (type == 'hexa') {
-												values3.push(this._interpolateValue(parseInt(values1[k], 16), parseInt(values2[k], 16), indexes[i], indexes[i + 1], position));
-											} else {
-												values3.push(this._interpolateValue(values1[k], values2[k], indexes[i], indexes[i + 1], position));
-											}
-										}
+						if(
+							Horizon.regex[type].test(interpolations[indexes[i]][name]) &&
+							Horizon.regex[type].test(interpolations[indexes[i+1]][name])
+						) {
+							// Extract values
+							values1 = Horizon.regex[type].exec(interpolations[indexes[i]][name]);
+							values2 = Horizon.regex[type].exec(interpolations[indexes[i+1]][name]);
+							values1.shift();
+							values2.shift();
+							// Interpolate values
+							values3 = [];
+							for(var k=0, l=values1.length; k<l; ++k) {
+								if(typeof values1[k] != 'undefined' && typeof values2[k] != 'undefined') {
+									if(type == 'hexa') {
+										values3.push(Horizon._interpolateValue(
+											parseInt(values1[k],16),
+											parseInt(values2[k],16),
+											indexes[i],
+											indexes[i+1],
+											position
+										));
 									}
-									// Set final property
-									switch (type) {
-										case 'list':
-											switch (values3.length) {
-												case 1:
-													properties[_name2] = values3[0];
-													break;
-												case 2:
-													properties[_name2] = values3[0] + ' ' + values3[1];
-													break;
-												case 3:
-													properties[_name2] = values3[0] + ' ' + values3[1] + ' ' + values3[2];
-													break;
-												case 4:
-													properties[_name2] = values3[0] + ' ' + values3[1] + ' ' + values3[2] + ' ' + values3[3];
-													break;
-											}
+									else {
+										values3.push(Horizon._interpolateValue(
+											values1[k],
+											values2[k],
+											indexes[i],
+											indexes[i+1],
+											position
+										));
+									}
+								}
+							}
+							// Set final property
+							switch(type) {
+								case 'list':
+									switch(values3.length) {
+										case 1:
+											properties[name] = values3[0];
 											break;
-										case 'hexa':
-											var a = Math.round(values3[0]).toString(16),
-											    b = Math.round(values3[1]).toString(16),
-											    c = Math.round(values3[2]).toString(16);
-											if (a.length == 1) a += '0';
-											if (b.length == 1) b += '0';
-											if (c.length == 1) c += '0';
-											properties[_name2] = '#' + a + b + c;
+										case 2:
+											properties[name] = values3[0]+' '+values3[1];
 											break;
-										case 'rgba':
-											if (values3.length == 3) {
-												properties[_name2] = 'rgb(' + Math.round(values3[0]) + ',' + Math.round(values3[1]) + ',' + Math.round(values3[2]) + ')';
-											} else {
-												properties[_name2] = 'rgba(' + Math.round(values3[0]) + ',' + Math.round(values3[1]) + ',' + Math.round(values3[2]) + ',' + Math.round(values3[3]) + ')';
-											}
+										case 3:
+											properties[name] = values3[0]+' '+values3[1]+' '+values3[2];
 											break;
-										case 'hsla':
-											if (values3.length == 3) {
-												properties[_name2] = 'hsl(' + Math.round(values3[0]) + ',' + Math.round(values3[1]) + '%,' + Math.round(values3[2]) + '%)';
-											} else {
-												properties[_name2] = 'hsla(' + Math.round(values3[0]) + ',' + Math.round(values3[1]) + '%,' + Math.round(values3[2]) + '%,' + Math.round(values3[3]) + ')';
-											}
+										case 4:
+											properties[name] = values3[0]+' '+values3[1]+' '+values3[2]+' '+values3[3];
 											break;
 									}
 									break;
-								}
+								case 'hexa':
+									var a = Math.round(values3[0]).toString(16),
+										b = Math.round(values3[1]).toString(16),
+										c = Math.round(values3[2]).toString(16);
+									if(a.length == 1) a += '0';
+									if(b.length == 1) b += '0';
+									if(c.length == 1) c += '0';
+									properties[name] = '#' + a + b + c;
+									break;
+								case 'rgba':
+									if(values3.length == 3) {
+										properties[name] = 'rgb(' +
+											Math.round(values3[0]) + ',' + 
+											Math.round(values3[1]) + ',' +
+											Math.round(values3[2]) + ')';
+									}
+									else {
+										properties[name] = 'rgba(' +
+											Math.round(values3[0]) + ',' +
+											Math.round(values3[1]) + ',' +
+											Math.round(values3[2]) + ',' +
+											Math.round(values3[3]) + ')';
+									}
+									break;
+								case 'hsla':
+									if(values3.length == 3) {
+										properties[name] = 'hsl(' + 
+											Math.round(values3[0]) + ',' +
+											Math.round(values3[1]) + '%,' +
+											Math.round(values3[2]) + '%)';
+									}
+									else {
+										properties[name] = 'hsla(' + 
+											Math.round(values3[0]) + ',' +
+											Math.round(values3[1]) + '%,' +
+											Math.round(values3[2]) + '%,' +
+											Math.round(values3[3]) + ')';
+									}
+									break;
 							}
-							// Restore non-numeric properties
-							if (!properties[_name2]) {
-								properties[_name2] = interpolations[indexes[i]][_name2];
-							}
-						}
-						break;
-					}
-				}
-				// We're at the end
-				else {
-						for (var _name3 in interpolations[indexes[i]]) {
-							properties[_name3] = interpolations[indexes[i]][_name3];
-						}
-					}
-			}
-			return properties;
-		}
-
-		/*
-  	Interpolate one value
-  	
-  	Parameters
-  		Number value1
-  		Number value2
-  		Number index1
-  		Number index2
-  		Number position
-  	
-  	Return
-  		Number
-  */
-	}, {
-		key: '_interpolateValue',
-		value: function _interpolateValue(value1, value2, index1, index2, position) {
-			// Normalize values
-			var unit1 = '',
-			    unit2 = '',
-			    value3 = undefined;
-			if (this.regex.unit.test(value1)) {
-				value1 = this.regex.unit.exec(value1);
-				unit1 = value1[2];
-				value1 = value1[1];
-			}
-			value1 = parseFloat(value1);
-			if (this.regex.unit.test(value2)) {
-				value2 = this.regex.unit.exec(value2);
-				unit2 = value2[2];
-				value2 = value2[1];
-			}
-			value2 = parseFloat(value2);
-			index1 = parseFloat(index1);
-			index2 = parseFloat(index2);
-			// Units mismatch
-			if (unit1 != unit2) {
-				value3 = value1 + unit1;
-			}
-			// Same value between both points
-			else if (value1 == value2) {
-					value3 = value1 + unit1;
-				}
-				// Different values, let's scale
-				else {
-						value3 = (position - index1) * (value2 - value1) / (index2 - index1) + value1 + unit1;
-					}
-			return value3;
-		}
-
-		/*
-  	Render elements
-  	
-  	Parameters
-  		Object args {
-  			event,
-  			x,
-  			y,
-  			duration,
-  			easing
-  		}
-  */
-	}, {
-		key: 'render',
-		value: function render(args) {
-			// Format arguments
-			args = args || {};
-			args.x = 'x' in args ? parseInt(args.x, 10) : 0;
-			args.y = 'y' in args ? parseInt(args.y, 10) : 0;
-			args.z = 'z' in args ? parseInt(args.z, 10) : 0;
-			args.duration = 'duration' in args ? parseFloat(args.duration) : 0.001;
-			args.easing = 'easing' in args ? args.easing : Power4.easeOut;
-			args.context = 'context' in args ? args.context : 'absolute';
-			// Normalize coords
-			if (args.context == 'relative') {
-				args.x = this.x + args.x;
-				args.y = this.y + args.y;
-				args.z = this.z + args.z;
-			}
-			// Refresh the viewport dimensions
-			this.detectViewport();
-			// Limit x/y to the layout boundaries
-			if (this.boundaries) {
-				if (args.x < 0) {
-					args.x = 0;
-				} else if (args.x > this.layout.width) {
-					args.x = this.layout.width;
-				}
-				if (args.y < 0) {
-					args.y = 0;
-				} else if (args.y > this.layout.height) {
-					args.y = this.layout.height;
-				}
-			}
-			// Generate animations
-			if (!('plugin' in args) || this.disabled_plugins.indexOf(args.plugin) == -1) {
-				var options = undefined,
-				    left = undefined,
-				    _top = undefined,
-				    width = undefined,
-				    height = undefined,
-				    element = undefined,
-				    that = this;
-				for (var plugin in this.callbacks) {
-					if (!('plugin' in args) || args.plugin == plugin) {
-						for (var i = 0, j = this.callbacks[plugin].length; i < j; ++i) {
-							element = this.callbacks[plugin][i];
-							// Define callback parameters
-							var params = {
-								x: args.x,
-								y: args.y,
-								z: args.z
-							};
-							// Define relative positions
-							left = element.node.offsetLeft;
-							_top = element.node.offsetTop;
-							width = element.node.offsetWidth;
-							height = element.node.offsetHeight;
-							params.left = left;
-							params.right = left - this.viewport.width + width;
-							params.centerX = left - (this.viewport.width - width) / 2;
-							params.top = _top;
-							params.bottom = _top - this.viewport.height + height;
-							params.centerY = _top - (this.viewport.height - height) / 2;
-							// Limit x/y to the layout boundaries
-							if (this.boundaries) {
-								if (params.x + width > this.layout.width) {
-									params.x = this.layout.width - width;
-								}
-								if (params.y + height > this.layout.height) {
-									params.y = this.layout.height - height;
-								}
-							}
-							// Populate options
-							options = element.callback(params);
-							if (!options) {
-								continue;
-							}
-							// Define animation options
-							options.autoCSS = true;
-							options.ease = options.ease || args.easing;
-							if (options.duration) {
-								args.duration = options.duration;
-								delete options.duration;
-							}
-							// Animate
-							TweenLite.to(element.node, args.duration, options);
+							break;
 						}
 					}
+					// Restore non-numeric properties
+					if(!properties[name]) {
+						properties[name] = interpolations[indexes[i]][name];
+					}
+				}
+				break;
+			}
+		}
+		// We're at the end
+		else {
+			for(var name in interpolations[indexes[i]]) {
+				properties[name] = interpolations[indexes[i]][name];
+			}
+		}
+	}
+	return properties;
+};
+
+/*
+	Interpolate one value
+
+	Parameters
+		Number value1
+		Number value2
+		Number index1
+		Number index2
+		Number position
+
+	Return
+		Number
+*/
+Horizon._interpolateValue = function(value1, value2, index1, index2, position) {
+	// Normalize values
+	var unit1 = '', unit2 = '', value3;
+	if(Horizon.regex.unit.test(value1)) {
+		value1 = Horizon.regex.unit.exec(value1);
+		unit1 = value1[2];
+		value1 = value1[1];
+	}
+	value1 = parseFloat(value1);
+	if(Horizon.regex.unit.test(value2)) {
+		value2 = Horizon.regex.unit.exec(value2);
+		unit2 = value2[2];
+		value2 = value2[1];
+	}
+	value2 = parseFloat(value2);
+	index1 = parseFloat(index1);
+	index2 = parseFloat(index2);
+	// Units mismatch
+	if(unit1 != unit2) {
+		value3 = value1 + unit1;
+	}
+	// Same value between both points
+	else if(value1 == value2) {
+		value3 = value1 + unit1;
+	}
+	// Different values, let's scale
+	else {
+		value3 = ((position - index1) *
+				(value2 - value1) /
+				(index2 - index1) +
+				value1) + unit1;
+	}
+	return value3;
+};
+
+/*
+	Render elements
+
+	Parameters
+		Object args {
+			event,
+			x,
+			y,
+			duration,
+			easing
+		}
+*/
+Horizon.render = function(args) {
+	// Format arguments
+	args = args || {};
+	args.x = 'x' in args ? parseInt(args.x,10) : 0;
+	args.y = 'y' in args ? parseInt(args.y,10) : 0;
+	args.z = 'z' in args ? parseInt(args.z,10) : 0;
+	args.duration = 'duration' in args ? parseFloat(args.duration) : 0.001;
+	args.easing = 'easing' in args ? args.easing : Power4.easeOut;
+	args.context = 'context' in args ? args.context : 'absolute';
+	// Normalize coords
+	if(args.context == 'relative') {
+		args.x = Horizon.x + args.x;
+		args.y = Horizon.y + args.y;
+		args.z = Horizon.z + args.z;
+	}
+	// Refresh the viewport dimensions
+	Horizon.detectViewport();
+	// Limit x/y to the layout boundaries
+	if(Horizon.boundaries) {
+		if(args.x < 0) {
+			args.x = 0;
+		}
+		else if(args.x > Horizon.layout.width) {
+			args.x = Horizon.layout.width;
+		}
+		if(args.y < 0) {
+			args.y = 0;
+		}
+		else if(args.y > Horizon.layout.height) {
+			args.y = Horizon.layout.height;
+		}
+	}
+	// Generate animations
+	if(!('plugin' in args) || Horizon.disabled_plugins.indexOf(args.plugin) == -1) {
+		var options, left, top, width, height, element;
+		for(var plugin in Horizon.callbacks) {
+			if(!('plugin' in args) || args.plugin == plugin) {
+				for(var i=0, j=Horizon.callbacks[plugin].length; i<j; ++i) {
+					element = Horizon.callbacks[plugin][i];
+					// Define callback parameters
+					var params = {
+						x: args.x,
+						y: args.y,
+						z: args.z
+					};
+					// Define relative positions
+					left = element.node.offsetLeft;
+					top = element.node.offsetTop;
+					width = element.node.offsetWidth;
+					height = element.node.offsetHeight;
+					params.left = left;
+					params.right = left - Horizon.viewport.width + width;
+					params.centerX = left - ((Horizon.viewport.width - width) / 2);
+					params.top = top;
+					params.bottom = top - Horizon.viewport.height + height;
+					params.centerY = top - ((Horizon.viewport.height - height) / 2);
+					// Limit x/y to the layout boundaries
+					if(Horizon.boundaries) {
+						if((params.x + width) > Horizon.layout.width) {
+							params.x = Horizon.layout.width - width;
+						}
+						if((params.y + height) > Horizon.layout.height) {
+							params.y = Horizon.layout.height - height;
+						}
+					}
+					// Populate options
+					options = element.callback(params);
+					if(!options) {
+						continue;
+					}
+					// Define animation options
+					options.autoCSS = true;
+					options.ease = options.ease || args.easing;
+					if(options.duration) {
+						args.duration = options.duration;
+						delete options.duration;
+					}
+					// Animate
+					TweenLite.to(element.node, args.duration, options);
 				}
 			}
-			// Update scene position
-			this.x = Math.abs(args.x); // abs() especially needed by Swipe
-			this.y = Math.abs(args.y);
-			this.z = Math.abs(args.z);
 		}
+	}
+	// Update scene position
+	Horizon.x = Math.abs(args.x); // abs() especially needed by Swipe
+	Horizon.y = Math.abs(args.y);
+	Horizon.z = Math.abs(args.z);
+};
 
-		/*
-  	Listen for events
-  	
-  	Parameters
-  		Array events
-  		Function callback
-  */
-	}, {
-		key: '_listen',
-		value: function _listen(events, callback) {
-			for (var i = 0, j = events.length; i < j; ++i) {
-				if (window.addEventListener) {
-					window.addEventListener(events[i], callback, false);
-				} else {
-					window.attachEvent('on' + events[i], callback);
-				}
-			}
+/*
+	Listen for events
+
+	Parameters
+		Array events
+		Function callback
+*/
+Horizon._listen = function(events, callback) {
+	for(var i=0, j=events.length; i<j; ++i) {
+		if(window.addEventListener) {
+			window.addEventListener(events[i], callback, false);
 		}
-
-		/*
-  	Add CSS rules in our own stylesheet
-  */
-	}, {
-		key: '_addCSSRule',
-		value: function _addCSSRule(selector, rules) {
-			if (!('sheet' in this)) {
-				var style = document.createElement('style');
-				style.appendChild(document.createTextNode('')); // Webkit
-				document.head.appendChild(style);
-				this.sheet = style.sheet;
-			}
-			if ('insertRule' in this.sheet) {
-				this.sheet.insertRule(selector + '{' + rules + '}', 0);
-			} else if ('addRule' in this.sheet) {
-				this.sheet.addRule(selector, rules, 0);
-			}
+		else{
+			window.attachEvent('on' + events[i], callback);
 		}
+	}
+};
 
-		/*
-  	RequestAnimationFrame wrapper
-  	
-  	Parameters
-  		Function func
-  */
-	}, {
-		key: '_requestAnimationFrame',
-		value: function _requestAnimationFrame(func) {
-			if (!('requestAnimationFrame' in window)) {
-				window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function (func) {
-					func();
-				};
-			}
-			window.requestAnimationFrame(func);
-		}
-	}]);
+/*
+	Add CSS rules in our own stylesheet
+*/
+Horizon._addCSSRule = function(selector, rules) {
+	if(!('sheet' in Horizon)) {
+		var style = document.createElement('style');
+		style.appendChild(document.createTextNode('')); // Webkit
+		document.head.appendChild(style);
+		Horizon.sheet = style.sheet;
+	}
+	if('insertRule' in Horizon.sheet) {
+		Horizon.sheet.insertRule(selector + '{' + rules + '}', 0);
+	}
+	else if('addRule' in Horizon.sheet) {
+		Horizon.sheet.addRule(selector, rules, 0);
+	}
+};
 
-	return Horizon;
-})();
+/*
+	RequestAnimationFrame wrapper
 
-exports['default'] = Horizon;
-module.exports = exports['default'];
+	Parameters
+		Function func
+*/
+Horizon._requestAnimationFrame = function(func) {
+	if(!('requestAnimationFrame' in window)) {
+		window.requestAnimationFrame = window.mozRequestAnimationFrame ||
+										window.webkitRequestAnimationFrame ||
+										window.msRequestAnimationFrame ||
+										function(func) { func(); };
+	}
+	window.requestAnimationFrame(func);
+};
 
+// Init
+Horizon.x = 0;
+Horizon.y = 0;
+Horizon.z = 0;
+Horizon.callbacks = {};
+Horizon.plugins = {};
+Horizon.disabled_plugins = [];
+Horizon.viewport = {width: 0, height: 0};
+Horizon.layout = {width: 0, height: 0};
+Horizon.orientation = 'landscape';
+Horizon.boundaries = false;
+Horizon.regex = {
+	unit: /(\d+(?:\.\d+)?)([a-z]+|%)/i,
+	list: /^(?:\s*([\w.]+)\s*)(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?$/,
+	hexa: /#(\w{2})(\w{2})(\w{2})/i,
+	rgba: /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+	hsla: /hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/
+};
+Horizon.detectViewport();
+Horizon.detectLayout();
+W.addListener(function() {
+	Horizon.detectViewport();
+	Horizon.detectLayout();
+	Horizon.detectOrientation();
+});
+
+// Export module
+module.exports = Horizon;
 },{"../node_modules/gsap/src/uncompressed/TweenLite.js":1,"../node_modules/gsap/src/uncompressed/easing/EasePack.js":2,"../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js":3,"../node_modules/pyrsmk-w/W.min.js":4}]},{},[5])(5)
-});window.Horizon = new Horizon();
+});

@@ -5,7 +5,6 @@ var fs = require('fs'),
 	rename = require('gulp-rename'),
 	merge = require('merge2'),
 	shell = require('gulp-shell'),
-	babelify = require('babelify'),
 	browserify = require('browserify'),
 	through2 = require('through2');
 
@@ -63,13 +62,11 @@ gulp.task('build', ['version'], function() {
 			.pipe( through2.obj(function(file, enc, next) {
 				var b = browserify(file.path, {standalone: 'Horizon'});
 
-				b.transform(babelify);
-
 				b.bundle(function(err, res) {
-					file.contents = Buffer.concat([
+					file.contents = res /*Buffer.concat([
 						res,
 						new Buffer('window.Horizon = new Horizon();', 'utf-8')
-					]);
+					])*/;
 					next(null, file);
 				});
 			}) )

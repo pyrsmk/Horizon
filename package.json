@@ -1,7 +1,7 @@
 {
   "name": "pyrsmk-horizon",
-  "description": "2D/3D parallax library, written in ES6",
-  "version": "2.0.8",
+  "description": "2D/3D parallax library",
+  "version": "2.1.0",
   "author": "Aurélien Delogu <pyrsmk@dreamysource.fr> (http://dreamysource.fr)",
   "repository": {
     "type": "git",
@@ -13,14 +13,14 @@
     "animation",
     "2D",
     "3D",
-	"es6",
-	  "swipe",
-	  "touch",
-	  "gyroscope",
-	  "canvas",
-	  "scroll",
-	  "mouse",
-	  "wheel"
+    "es6",
+    "swipe",
+    "touch",
+    "gyroscope",
+    "canvas",
+    "scroll",
+    "mouse",
+    "wheel"
   ],
   "license": "MIT",
   "bugs": {
@@ -29,7 +29,6 @@
   },
   "homepage": "http://horizonjs.io",
   "devDependencies": {
-    "babelify": "^6.1.2",
     "browserify": "^10.2.3",
     "gulp": "^3.9.0",
     "gulp-rename": "^1.2.2",

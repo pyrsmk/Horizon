@@ -1,7 +1,7 @@
-Horizon 2.0.8
+Horizon 2.1.0
 =============
 
-Horizon is an ES6 parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
+Horizon is a parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
 
 It currently supports :
 
@@ -17,7 +17,7 @@ It currently supports :
 Private/Commercial use
 ----------------------
 
-Horizon will remain free for private use. Currently, it is free for commercial use too, until we launch the project website. The website will propose personal Horizon bundles, like Modernizr.
+Horizon will remain free for private use. Currently, it is free for commercial use too, until we launch the project website. The website will propose custom Horizon bundles, like Modernizr.
 
 Install
 -------

@@ -1,6 +1,6 @@
 Horizon._registerPlugin('canvas2d', function() {
 	// Override canvas2d()
-	Horizon.__proto__.canvas2d = function(scene, images) {
+	Horizon.canvas2d = function(scene, images) {
 		// Get context
 		var canvas2d = scene.getContext('2d');
 		// Animation loop
