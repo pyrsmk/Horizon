@@ -1,4 +1,4 @@
-/*! Horizon 2.0.6 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.0.7 (https://github.com/pyrsmk/Horizon) */
 
 import '../node_modules/gsap/src/uncompressed/TweenLite.js';
 import '../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js';
@@ -161,11 +161,11 @@ class Horizon {
 			Function callback
 	*/
 	parallax(plugins, node, callback) {
-		for(let plugin of plugins) {
-			if(!(plugin in this)) {
-				throw new Error("'"+plugin+"' plugin is not registered");
+		for(let i=0, j=plugins.length; i<j; ++i) {
+			if(!(plugins[i] in this)) {
+				throw new Error("'"+plugins[i]+"' plugin is not registered");
 			}
-			this[plugin](node, callback);
+			this[plugins[i]](node, callback);
 		}
 	}
 	
@@ -414,10 +414,11 @@ class Horizon {
 		// Generate animations
 		if(!('plugin' in args) || this.disabled_plugins.indexOf(args.plugin) == -1) {
 			let options, left, top, width, height,
-				that = this;
+				element, that = this;
 			for(let plugin in this.callbacks) {
 				if(!('plugin' in args) || args.plugin == plugin) {
-					for(let element of this.callbacks[plugin]) {
+					for(let i=0, j=this.callbacks[plugin].length; i<j; ++i) {
+						element = this.callbacks[plugin][i];
 						// Define callback parameters
 						let params = {
 							x: args.x,
@@ -476,12 +477,12 @@ class Horizon {
 			Function callback
 	*/
 	_listen(events, callback) {
-		for(let event of events) {
+		for(let i=0, j=events.length; i<j; ++i) {
 			if(window.addEventListener) {
-				window.addEventListener(event, callback, false);
+				window.addEventListener(events[i], callback, false);
 			}
 			else{
-				window.attachEvent('on'+event, callback);
+				window.attachEvent('on' + events[i], callback);
 			}
 		}
 	}

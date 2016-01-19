@@ -5123,32 +5123,11 @@ var Horizon = (function () {
 	}, {
 		key: 'parallax',
 		value: function parallax(plugins, node, callback) {
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
-
-			try {
-				for (var _iterator = plugins[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var plugin = _step.value;
-
-					if (!(plugin in this)) {
-						throw new Error("'" + plugin + "' plugin is not registered");
-					}
-					this[plugin](node, callback);
+			for (var i = 0, j = plugins.length; i < j; ++i) {
+				if (!(plugins[i] in this)) {
+					throw new Error("'" + plugins[i] + "' plugin is not registered");
 				}
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion && _iterator['return']) {
-						_iterator['return']();
-					}
-				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
-				}
+				this[plugins[i]](node, callback);
 			}
 		}
 
@@ -5372,71 +5351,52 @@ var Horizon = (function () {
 				    _top = undefined,
 				    width = undefined,
 				    height = undefined,
+				    element = undefined,
 				    that = this;
 				for (var plugin in this.callbacks) {
 					if (!('plugin' in args) || args.plugin == plugin) {
-						var _iteratorNormalCompletion2 = true;
-						var _didIteratorError2 = false;
-						var _iteratorError2 = undefined;
-
-						try {
-							for (var _iterator2 = this.callbacks[plugin][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-								var element = _step2.value;
-
-								// Define callback parameters
-								var params = {
-									x: args.x,
-									y: args.y,
-									z: args.z
-								};
-								// Define relative positions
-								left = element.node.offsetLeft;
-								_top = element.node.offsetTop;
-								width = element.node.offsetWidth;
-								height = element.node.offsetHeight;
-								params.left = left;
-								params.right = left - this.viewport.width + width;
-								params.centerX = left - (this.viewport.width - width) / 2;
-								params.top = _top;
-								params.bottom = _top - this.viewport.height + height;
-								params.centerY = _top - (this.viewport.height - height) / 2;
-								// Limit x/y to the layout boundaries
-								if (this.boundaries) {
-									if (params.x + width > this.layout.width) {
-										params.x = this.layout.width - width;
-									}
-									if (params.y + height > this.layout.height) {
-										params.y = this.layout.height - height;
-									}
+						for (var i = 0, j = this.callbacks[plugin].length; i < j; ++i) {
+							element = this.callbacks[plugin][i];
+							// Define callback parameters
+							var params = {
+								x: args.x,
+								y: args.y,
+								z: args.z
+							};
+							// Define relative positions
+							left = element.node.offsetLeft;
+							_top = element.node.offsetTop;
+							width = element.node.offsetWidth;
+							height = element.node.offsetHeight;
+							params.left = left;
+							params.right = left - this.viewport.width + width;
+							params.centerX = left - (this.viewport.width - width) / 2;
+							params.top = _top;
+							params.bottom = _top - this.viewport.height + height;
+							params.centerY = _top - (this.viewport.height - height) / 2;
+							// Limit x/y to the layout boundaries
+							if (this.boundaries) {
+								if (params.x + width > this.layout.width) {
+									params.x = this.layout.width - width;
 								}
-								// Populate options
-								options = element.callback(params);
-								if (!options) {
-									continue;
-								}
-								// Define animation options
-								options.autoCSS = true;
-								options.ease = options.ease || args.easing;
-								if (options.duration) {
-									args.duration = options.duration;
-									delete options.duration;
-								}
-								// Animate
-								TweenLite.to(element.node, args.duration, options);
-							}
-						} catch (err) {
-							_didIteratorError2 = true;
-							_iteratorError2 = err;
-						} finally {
-							try {
-								if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-									_iterator2['return']();
-								}
-							} finally {
-								if (_didIteratorError2) {
-									throw _iteratorError2;
+								if (params.y + height > this.layout.height) {
+									params.y = this.layout.height - height;
 								}
 							}
+							// Populate options
+							options = element.callback(params);
+							if (!options) {
+								continue;
+							}
+							// Define animation options
+							options.autoCSS = true;
+							options.ease = options.ease || args.easing;
+							if (options.duration) {
+								args.duration = options.duration;
+								delete options.duration;
+							}
+							// Animate
+							TweenLite.to(element.node, args.duration, options);
 						}
 					}
 				}
@@ -5457,32 +5417,11 @@ var Horizon = (function () {
 	}, {
 		key: '_listen',
 		value: function _listen(events, callback) {
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
-
-			try {
-				for (var _iterator3 = events[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var _event = _step3.value;
-
-					if (window.addEventListener) {
-						window.addEventListener(_event, callback, false);
-					} else {
-						window.attachEvent('on' + _event, callback);
-					}
-				}
-			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-						_iterator3['return']();
-					}
-				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
-					}
+			for (var i = 0, j = events.length; i < j; ++i) {
+				if (window.addEventListener) {
+					window.addEventListener(events[i], callback, false);
+				} else {
+					window.attachEvent('on' + events[i], callback);
 				}
 			}
 		}
