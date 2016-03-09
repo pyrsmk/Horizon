@@ -1,4 +1,4 @@
-/*! Horizon 2.2.1 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.2.2 (https://github.com/pyrsmk/Horizon) */
 
 require('../node_modules/gsap/src/uncompressed/TweenLite.js');
 require('../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js');
@@ -426,11 +426,11 @@ Horizon.render = function(args) {
 				}
 			}
 		}
+		// Update scene position
+		Horizon.x = Math.abs(args.x); // abs() especially needed by Swipe
+		Horizon.y = Math.abs(args.y);
+		Horizon.z = Math.abs(args.z);
 	}
-	// Update scene position
-	Horizon.x = Math.abs(args.x); // abs() especially needed by Swipe
-	Horizon.y = Math.abs(args.y);
-	Horizon.z = Math.abs(args.z);
 };
 
 /*
