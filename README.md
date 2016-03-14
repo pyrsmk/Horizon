@@ -14,11 +14,6 @@ It currently supports :
 - Canvas2D engine
 - Gyroscope (experimental)
 
-Private/Commercial use
-----------------------
-
-Horizon will remain free for private use. Currently, it is free for commercial use too, until we launch the project website. The website will propose custom Horizon bundles, like Modernizr.
-
 Install
 -------
 
