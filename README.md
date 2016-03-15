@@ -181,13 +181,9 @@ $('.img').forEach(function() {
 		opacity: 0,
 		roation: 0
 	};
-	image.canvas2d.left = left;
-	image.canvas2d.top = top;
-	image.canvas2d.opacity = 0;
-	image.canvas2d.rotation = 0;
 	// Parallax with scroll
 	Horizon.scroll(this.canvas2d, function(args) {
-		var factor = parseFloat($(this).data('factor'));
+		var factor = parseFloat($(this).data('factor')); // Here's our factor
 		return {left: args.x * factor};
 	});
 });
