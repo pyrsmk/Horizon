@@ -47,8 +47,8 @@ Horizon._registerPlugin('canvas2d', function() {
 				// Draw image
 				canvas2d.drawImage(
 					images[i].cache,
-					images[i].canvas2d.left,
-					images[i].canvas2d.top
+					images[i].canvas2d.left || 0,
+					images[i].canvas2d.top || 0
 				);
 				// Restore state
 				canvas2d.restore();
