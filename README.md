@@ -175,7 +175,7 @@ Please note that all usual properties that we can animate with the other plugins
 $('.img').forEach(function() {
 	// Initialize the canvas2d object
 	// (all properties are not required, it depends on what you want to animate)
-	image.canvas2d = {
+	this.canvas2d = {
 		left: 0,
 		top: 0,
 		opacity: 0,
