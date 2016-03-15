@@ -189,7 +189,7 @@ $('.img').forEach(function() {
 });
 ```
 
-If you want to see how `Canvas2D` si working in live, please [see this example](http://horizonjs.io/examples/canvas2d+scroll.html).
+If you want to see how `Canvas2D` is working in live, please [see this example](http://horizonjs.io/examples/canvas2d+scroll.html).
 
 Note : you should never set the `width` and `height` of your `canvas` element in CSS (unless you know what you're doing); instead define the node `width` and `height` attributes
 
