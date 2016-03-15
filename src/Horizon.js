@@ -1,4 +1,4 @@
-/*! Horizon 2.2.4 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 2.2.5 (https://github.com/pyrsmk/Horizon) */
 
 require('../node_modules/gsap/src/uncompressed/TweenLite.js');
 require('../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js');
@@ -439,14 +439,18 @@ Horizon.render = function(args) {
 	Parameters
 		Array events
 		Function callback
+		Object node
 */
-Horizon._listen = function(events, callback) {
+Horizon._listen = function(events, callback, node) {
+	if(!node) {
+		node = window;
+	}
 	for(var i=0, j=events.length; i<j; ++i) {
-		if(window.addEventListener) {
-			window.addEventListener(events[i], callback, false);
+		if(node.addEventListener) {
+			node.addEventListener(events[i], callback, false);
 		}
 		else{
-			window.attachEvent('on' + events[i], callback);
+			node.attachEvent('on' + events[i], callback);
 		}
 	}
 };
