@@ -1,4 +1,4 @@
-Horizon 2.2.3
+Horizon 2.2.4
 =============
 
 Horizon is a parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
@@ -80,6 +80,12 @@ Horizon.scroll(node, function(args) {
 		top: args.y
 	};
 });
+```
+
+If needed, you can initialize this plugin with the `node` to listen.
+
+```js
+Horizon.initPlugin('scroll', $('.container')[0]);
 ```
 
 ### Mouse
