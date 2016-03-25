@@ -1,7 +1,7 @@
 {
   "name": "pyrsmk-horizon",
   "description": "2D/3D parallax library",
-  "version": "2.2.5",
+  "version": "3.0.0",
   "author": "Aurélien Delogu <pyrsmk@dreamysource.fr> (http://dreamysource.fr)",
   "repository": {
     "type": "git",

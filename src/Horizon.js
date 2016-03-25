@@ -1,38 +1,88 @@
-/*! Horizon 2.2.5 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 3.0.0 (https://github.com/pyrsmk/Horizon) */
 
-require('../node_modules/gsap/src/uncompressed/TweenLite.js');
-require('../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js');
-require('../node_modules/gsap/src/uncompressed/easing/EasePack.js');
-var W = require('../node_modules/pyrsmk-w/W.min.js');
+var W = require('../node_modules/pyrsmk-w/W.min.js'),
+	Horizon = {};
 
-var Horizon = {};
+// Init properties
+Horizon.scene = window;
+Horizon.x = 0;
+Horizon.y = 0;
+Horizon.z = 0;
+Horizon.callbacks = {};
+Horizon.engines = {};
+Horizon.engine = '';
+Horizon.inputs = {};
+Horizon.disabled_inputs = [];
+Horizon.viewport = {width: 0, height: 0};
+Horizon.layout = {width: 0, height: 0};
+Horizon.orientation = 'landscape';
+Horizon.boundaries = false;
+Horizon.regex = {
+	unit: /(\d+(?:\.\d+)?)([a-z]+|%)/i,
+	list: /^(?:\s*([\w.]+)\s*)(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?$/,
+	hexa: /#(\w{2})(\w{2})(\w{2})/i,
+	rgba: /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+	hsla: /hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/
+};
+
+/*
+	Set scene node
+	
+	Parameters
+		Object scene
+*/
+Horizon.setScene = function(scene) {
+	Horizon.scene = scene;
+	Horizon.detectViewport();
+	Horizon.detectLayout();
+};
 
 /*
 	Detect the viewport dimensions
 */
 Horizon.detectViewport = function() {
-	Horizon.viewport.width = W.getViewportWidth();
-	Horizon.viewport.height = W.getViewportHeight();
+	var width,
+		height;
+	if(Horizon.scene === window) {
+		width = W.getViewportWidth();
+		height = W.getViewportHeight();
+	}
+	else {
+		width = Horizon.scene.offsetWidth;
+		height = Horizon.scene.offsetHeight;
+	}
+	Horizon.viewport.width = width;
+	Horizon.viewport.height = height;
 };
 
 /*
 	Detect the layout dimensions
 */
 Horizon.detectLayout = function() {
-	Horizon.layout.width = Math.max(
-		document.body ? document.body.scrollWidth : 0,
-		document.body ? document.body.offsetWidth : 0,
-		document.documentElement.clientWidth,
-		document.documentElement.scrollWidth,
-		document.documentElement.offsetWidth
-	);
-	Horizon.layout.height = Math.max(
-		document.body ? document.body.scrollHeight : 0,
-		document.body ? document.body.offsetHeight : 0,
-		document.documentElement.clientHeight,
-		document.documentElement.scrollHeight,
-		document.documentElement.offsetHeight
-	);
+	var width,
+		height;
+	if(Horizon.scene === window) {
+		width = Math.max(
+			document.body ? document.body.scrollWidth : 0,
+			document.body ? document.body.offsetWidth : 0,
+			document.documentElement.clientWidth,
+			document.documentElement.scrollWidth,
+			document.documentElement.offsetWidth
+		);
+		height = Math.max(
+			document.body ? document.body.scrollHeight : 0,
+			document.body ? document.body.offsetHeight : 0,
+			document.documentElement.clientHeight,
+			document.documentElement.scrollHeight,
+			document.documentElement.offsetHeight
+		);
+	}
+	else {
+		width = Horizon.scene.scrollWidth;
+		height = Horizon.scene.scrollHeight;
+	}
+	Horizon.layout.width = width;
+	Horizon.layout.height = height;
 };
 
 /*
@@ -43,21 +93,43 @@ Horizon.detectOrientation = function() {
 };
 
 /*
-	Register a plugin
+	Register an engine
+	
+	Parameters
+		String name
+		Function func
+*/
+Horizon.registerEngine = function(name, func) {
+	Horizon.engines[name] = func;
+	Horizon.setEngine(name);
+};
+
+/*
+	Switch current engine to another one
+	
+	Parameters
+		String name
+*/
+Horizon.setEngine = function(name) {
+	Horizon.engine = name;
+};
+
+/*
+	Register an input plugin
 
 	Parameters
 		String name
 		Function constructor
 		Function setter
 */
-Horizon._registerPlugin = function(name, constructor, setter) {
+Horizon.registerInput = function(name, constructor, setter) {
 	constructor.loaded = false;
-	Horizon.plugins[name] = {
+	Horizon.inputs[name] = {
 		constructor: constructor,
 		setter: setter
 	};
 	Horizon[name] = function(node, callback) {
-		Horizon.initPlugin(name);
+		Horizon.initInput(name);
 		if(!(name in Horizon.callbacks)) {
 			Horizon.callbacks[name] = [];
 		}
@@ -69,39 +141,39 @@ Horizon._registerPlugin = function(name, constructor, setter) {
 };
 
 /*
-	Initialize a plugin
+	Initialize an input plugin
 
 	Parameters
 		String name
 		Object options
 */
-Horizon.initPlugin = function(name, options) {
-	if(!Horizon.plugins[name].loaded) {
-		Horizon.plugins[name].constructor(options);
-		Horizon.plugins[name].loaded = true;
+Horizon.initInput = function(name, options) {
+	if(!Horizon.inputs[name].loaded) {
+		Horizon.inputs[name].constructor(options);
+		Horizon.inputs[name].loaded = true;
 	}
 };
 
 /*
-	Disable a plugin from rendering
+	Disable an input plugin from rendering
 
 	Parameters
 		String name
 */
-Horizon.disablePlugin = function(name) {
-	if(Horizon.disabled_plugins.indexOf(name) == -1) {
-		Horizon.disabled_plugins.push(name);
+Horizon.disableInput = function(name) {
+	if(Horizon.disabled_inputs.indexOf(name) == -1) {
+		Horizon.disabled_inputs.push(name);
 	}
 };
 
 /*
-	Enable a plugin that has been previously disabled
+	Enable an input plugin that has been previously disabled
 
 	Parameters
 		String name
 */
-Horizon.enablePlugin = function(name) {
-	Horizon.disabled_plugins.splice(Horizon.disabled_plugins.indexOf(name), 1);
+Horizon.enableInput = function(name) {
+	Horizon.disabled_inputs.splice(Horizon.disabled_inputs.indexOf(name), 1);
 };
 
 /*
@@ -112,25 +184,25 @@ Horizon.enablePlugin = function(name) {
 		Object options
 */
 Horizon.setXY = function(name, options) {
-	if(typeof Horizon.plugins[name].setter == 'function') {
-		Horizon.plugins[name].setter(options);
+	if(typeof Horizon.inputs[name].setter == 'function') {
+		Horizon.inputs[name].setter(options);
 	}
 };
 
 /*
-	Add a parallax animation
+	Add a parallax animation for several inputs
 
 	Parameters
-		Array plugins
+		Array inputs
 		Object node
 		Function callback
 */
-Horizon.parallax = function(plugins, node, callback) {
-	for(var i=0, j=plugins.length; i<j; ++i) {
-		if(!(plugins[i] in Horizon)) {
-			throw new Error("'"+plugins[i]+"' plugin is not registered");
+Horizon.parallax = function(inputs, node, callback) {
+	for(var i=0, j=inputs.length; i<j; ++i) {
+		if(!(inputs[i] in Horizon)) {
+			throw new Error("'"+inputs[i]+"' input plugin is not registered");
 		}
-		Horizon[plugins[i]](node, callback);
+		Horizon[inputs[i]](node, callback);
 	}
 };
 
@@ -186,16 +258,16 @@ Horizon.interpolate = function(position, interpolations) {
 							for(var k=0, l=values1.length; k<l; ++k) {
 								if(typeof values1[k] != 'undefined' && typeof values2[k] != 'undefined') {
 									if(type == 'hexa') {
-										values3.push(Horizon._interpolateValue(
-											parseInt(values1[k],16),
-											parseInt(values2[k],16),
+										values3.push(Horizon.interpolateValue(
+											parseInt(values1[k], 16),
+											parseInt(values2[k], 16),
 											indexes[i],
 											indexes[i+1],
 											position
 										));
 									}
 									else {
-										values3.push(Horizon._interpolateValue(
+										values3.push(Horizon.interpolateValue(
 											values1[k],
 											values2[k],
 											indexes[i],
@@ -297,7 +369,7 @@ Horizon.interpolate = function(position, interpolations) {
 	Return
 		Number
 */
-Horizon._interpolateValue = function(value1, value2, index1, index2, position) {
+Horizon.interpolateValue = function(value1, value2, index1, index2, position) {
 	// Normalize values
 	var unit1 = '', unit2 = '', value3;
 	if(Horizon.regex.unit.test(value1)) {
@@ -337,7 +409,7 @@ Horizon._interpolateValue = function(value1, value2, index1, index2, position) {
 
 	Parameters
 		Object args {
-			event,
+			input,
 			x,
 			y,
 			duration,
@@ -359,8 +431,6 @@ Horizon.render = function(args) {
 		args.y = Horizon.y + args.y;
 		args.z = Horizon.z + args.z;
 	}
-	// Refresh the viewport dimensions
-	Horizon.detectViewport();
 	// Limit x/y to the layout boundaries
 	if(Horizon.boundaries) {
 		if(args.x < 0) {
@@ -377,12 +447,17 @@ Horizon.render = function(args) {
 		}
 	}
 	// Generate animations
-	if(!('plugin' in args) || Horizon.disabled_plugins.indexOf(args.plugin) == -1) {
-		var options, left, top, width, height, element;
-		for(var plugin in Horizon.callbacks) {
-			if(!('plugin' in args) || args.plugin == plugin) {
-				for(var i=0, j=Horizon.callbacks[plugin].length; i<j; ++i) {
-					element = Horizon.callbacks[plugin][i];
+	if(!('input' in args) || Horizon.disabled_inputs.indexOf(args.input) == -1) {
+		var left,
+			top,
+			width,
+			height,
+			element,
+			properties;
+		for(var input in Horizon.callbacks) {
+			if(!('input' in args) || args.input == input) {
+				for(var i=0, j=Horizon.callbacks[input].length; i<j; ++i) {
+					element = Horizon.callbacks[input][i];
 					// Define callback parameters
 					var params = {
 						x: args.x,
@@ -410,26 +485,28 @@ Horizon.render = function(args) {
 						}
 					}
 					// Populate options
-					options = element.callback(params);
-					if(!options) {
+					properties = element.callback(params);
+					if(!properties) {
 						continue;
 					}
-					// Define animation options
-					options.autoCSS = true;
-					options.ease = options.ease || args.easing;
-					if(options.duration) {
-						args.duration = options.duration;
-						delete options.duration;
+					if(properties.duration) {
+						args.duration = properties.duration;
+						delete properties.duration;
 					}
-					// Animate
-					TweenLite.to(element.node, args.duration, options);
+					// Render
+					Horizon.engines[Horizon.engine]({
+						node: element.node,
+						duration: args.duration,
+						easing: args.easing,
+						properties: properties
+					});
 				}
 			}
 		}
 		// Update scene position
-		Horizon.x = Math.abs(args.x); // abs() especially needed by Swipe
-		Horizon.y = Math.abs(args.y);
-		Horizon.z = Math.abs(args.z);
+		Horizon.x = args.x;
+		Horizon.y = args.y;
+		Horizon.z = args.z;
 	}
 };
 
@@ -438,13 +515,10 @@ Horizon.render = function(args) {
 
 	Parameters
 		Array events
-		Function callback
 		Object node
+		Function callback
 */
-Horizon._listen = function(events, callback, node) {
-	if(!node) {
-		node = window;
-	}
+Horizon.listen = function(events, node, callback) {
 	for(var i=0, j=events.length; i<j; ++i) {
 		if(node.addEventListener) {
 			node.addEventListener(events[i], callback, false);
@@ -458,7 +532,7 @@ Horizon._listen = function(events, callback, node) {
 /*
 	Add CSS rules in our own stylesheet
 */
-Horizon._addCSSRule = function(selector, rules) {
+Horizon.addCSSRule = function(selector, rules) {
 	if(!('sheet' in Horizon)) {
 		var style = document.createElement('style');
 		style.appendChild(document.createTextNode('')); // Webkit
@@ -474,12 +548,12 @@ Horizon._addCSSRule = function(selector, rules) {
 };
 
 /*
-	RequestAnimationFrame wrapper
+	Simple RequestAnimationFrame polyfill
 
 	Parameters
 		Function func
 */
-Horizon._requestAnimationFrame = function(func) {
+Horizon.requestAnimationFrame = function(func) {
 	if(!('requestAnimationFrame' in window)) {
 		window.requestAnimationFrame = window.mozRequestAnimationFrame ||
 										window.webkitRequestAnimationFrame ||
@@ -490,30 +564,11 @@ Horizon._requestAnimationFrame = function(func) {
 };
 
 // Init
-Horizon.x = 0;
-Horizon.y = 0;
-Horizon.z = 0;
-Horizon.callbacks = {};
-Horizon.plugins = {};
-Horizon.disabled_plugins = [];
-Horizon.viewport = {width: 0, height: 0};
-Horizon.layout = {width: 0, height: 0};
-Horizon.orientation = 'landscape';
-Horizon.boundaries = false;
-Horizon.regex = {
-	unit: /(\d+(?:\.\d+)?)([a-z]+|%)/i,
-	list: /^(?:\s*([\w.]+)\s*)(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?$/,
-	hexa: /#(\w{2})(\w{2})(\w{2})/i,
-	rgba: /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-	hsla: /hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/
-};
-Horizon.detectViewport();
-Horizon.detectLayout();
 W.addListener(function() {
 	Horizon.detectViewport();
 	Horizon.detectLayout();
 	Horizon.detectOrientation();
-});
+})();
 
 // Export module
 module.exports = Horizon;

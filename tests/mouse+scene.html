@@ -19,38 +19,35 @@
 			.block {
 				width: 100%;
 				height: 100%;
-				position: absolute;
-				z-index: 1;
-				background: url('images/background.jpg');
-				background-size: cover;
+				background-image: url(images/background.jpg);
+				background-size: 102%;
 				background-position: 50% 50%;
-			}
-			
-			.hsla {
-				width: 100%;
-				height: 100%;
-				position: relative;
-				z-index: 2;
-				background: hsla(0,50%,50%,0.3);
 			}
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
 		<script src="../build/unminified/GsapEngine.js"></script>
-		<script src="../build/unminified/WheelInput.js"></script>
+		<script src="../build/unminified/MouseInput.js"></script>
 	</head>
 	<body>
 		<div class="block"></div>
-		<div class="hsla"></div>
 		<script>
 			
 			var $ = quark.$,
 				$$ = quark.$$;
 			
-			Horizon.wheel($('.hsla').node, function(args) {
-				return {
-					background: 'hsla('+(args.y/10)+',50%,50%,0.3)'
-				};
+			Horizon.setScene($('.block').node);
+			
+			Horizon.mouse($('.block').node, function(args) {
+				var percentX = args.x * 100 / Horizon.viewport.width,
+					percentY = args.y * 100 / Horizon.viewport.height;
+				if(percentX > 100) {
+					percentX = 100;
+				}
+				if(percentY > 100) {
+					percentY = 100;
+				}
+				return {backgroundPosition: percentX + '% ' + percentY + '%'};
 			});
 			
 		</script>

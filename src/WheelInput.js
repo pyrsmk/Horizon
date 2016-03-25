@@ -1,5 +1,5 @@
-Horizon._registerPlugin('wheel', function() {
-	Horizon._listen(['mousewheel', 'wheel', 'MozMousePixelScroll'], function(e) {
+Horizon.registerInput('wheel', function() {
+	Horizon.listen(['mousewheel', 'wheel', 'MozMousePixelScroll'], window, function(e) {
 		// Compute position
 		var y;
 		e = e || window.event;
@@ -17,7 +17,7 @@ Horizon._registerPlugin('wheel', function() {
 		}
 		if(y) { // Because IE triggers 2 wheel events : one normal and another one which returns 0
 			Horizon.render({
-				plugin: 'wheel',
+				input: 'wheel',
 				context: 'relative',
 				x: y,
 				y: y,

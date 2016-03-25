@@ -24,9 +24,10 @@
 			}
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/minified/Horizon.min.js"></script>
-		<script src="../build/minified/Scroll.min.js"></script>
-		<script src="../build/minified/Canvas2D.min.js"></script>
+		<script src="../build/unminified/Horizon.js"></script>
+		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/Canvas2dEngine.js"></script>
+		<script src="../build/unminified/ScrollInput.js"></script>
 	</head>
 	<body>
 		<div class="layout"></div>
@@ -42,18 +43,19 @@
 			$('.scene').node.width = Horizon.viewport.width;
 			$('.scene').node.height = Horizon.viewport.height;
 			
-			Horizon.canvas2d($('.scene').node, [$('img').node]);
-			
-			$('img').node.canvas2d = {
+			var img = {
+				node: $('img').node,
 				left: (Horizon.layout.width - $('img').node.naturalWidth) / 2,
 				top: -300,
-				rotation: 0
+				rotate: 0
 			};
 			
-			Horizon.scroll($('img').node.canvas2d, function(args) {
+			Horizon.initCanvas2D($('.scene').node, [img]);
+			
+			Horizon.scroll(img, function(args) {
 				return {
 					top: args.y * 1.2 - 300,
-					rotation: - args.y * 360 / Horizon.viewport.height
+					rotate: - args.y * 360 / Horizon.viewport.height
 				};
 			});
 			

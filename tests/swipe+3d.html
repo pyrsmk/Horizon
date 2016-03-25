@@ -43,8 +43,9 @@
 			.container__object .bottom { transform: rotateX( -90deg ) translateZ( 100px ); background: deeppink; }
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
-		<script src="../build/minified/Horizon.min.js"></script>
-		<script src="../build/minified/Swipe.min.js"></script>
+		<script src="../build/unminified/Horizon.js"></script>
+		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/SwipeInput.js"></script>
 	</head>
 	<body>
 		<section class="container">
@@ -64,8 +65,8 @@
 			
 			Horizon.swipe($('.container__object').node, function(args) {
 				return {
-					rotationX: -args.y,
-					rotationY: args.x
+					rotationX: args.y,
+					rotationY: -args.x
 				};
 			});
 			

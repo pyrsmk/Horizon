@@ -1,4 +1,4 @@
-Horizon 2.2.5
+Horizon 3.0.0
 =============
 
 Horizon is a parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
@@ -85,7 +85,7 @@ Horizon.scroll(node, function(args) {
 If needed, you can initialize this plugin with the `node` to listen.
 
 ```js
-Horizon.initPlugin('scroll', $('.container')[0]);
+Horizon.initInput('scroll', $('.container')[0]);
 ```
 
 ### Mouse
@@ -126,78 +126,53 @@ If needed, you can initialize this plugin with arguments for [Impetus](https://g
 
 ```js
 // Limit the Y axis when swiping
-Horizon.initPlugin('swipe', {
+Horizon.initInput('swipe', {
 	boundY: [-Horizon.layout.height, 0]
 });
 ```
 
-### Background
-
-The `Background` plugin is a special plugin that lets you make a background covered image moves according to the `Mouse` input.
-
-```js
-// The node parameter, is the node where the background is applied (it's the body, most of the time)
-Horizon.background(node, 'background.jpg');
-```
-
-You can specify how wide your background should be. The value is the background size in percent (the default value is `105`) :
-
-```js
-// This will show a moving tiled background
-Horizon.background(node, 'background.jpg', 20);
-```
-
 ### Canvas2D
 
-The `Canvas2D` engine is known to be really efficient and we chose to implement it in Horizon, so you can use it to display parallaxed images with powered by hardware acceleration.
+The `Canvas2D` engine is known to be really efficient and we chose to implement it in Horizon, so you can use it to display parallaxed images powered by hardware acceleration.
 
-The way you can run it in Horizon is a bit different than the other plugins. First, define your `canvas` element and the images to load (it's not needed, but we're defining a `factor` data attribute so we can easily define our image parameters).
+The way you can run it in Horizon is a bit different than the other plugins. First, define your `canvas` element and the images to load.
 
 ```html
-<!-- We advise you to hide your images in CSS -->
-<img src="images/img1.jpg" data-factor="-0.4">
-<img src="images/img2.jpg" data-factor="-0.2">
-<img src="images/img3.jpg" data-factor="0.3">
+<img src="images/img.jpg" style="display: none;">
 <canvas class="scene" width="600" height="600"></canvas>
 ```
 
-Then, you need to register the scene and the images you want to parallax.
+Then, you need to register the scene and the objects to animate (for Canvas2D we're creating manual objects, we won't pass the image nodes directly).
 
 ```js
-Horizon.canvas2d($('.scene')[0], $('img'));
-```
+var img = {
+	node: $('img')[0],
+	left: 0
+};
 
-Now that all is linked as well, we can animate our images. To accomplish this, we won't animate the node itself but its `canvas2d` property, that we must initialize by ourselves.
+Horizon.initCanvas2D($('.scene')[0], [img]);
+```
 
 Please note that all usual properties that we can animate with the other plugins are not supported. Here's the available ones :
 
 - left : integer
 - top : integer
 - scale : {x, y}
-- rotation : integer (in degrees)
+- rotate : integer (in degrees)
 - opacity : float (between 0 and 1)
 
 ```js
-$('.img').forEach(function() {
-	// Initialize the canvas2d object
-	// (all properties are not required, it depends on what you want to animate)
-	this.canvas2d = {
-		left: 0,
-		top: 0,
-		opacity: 0,
-		roation: 0
-	};
-	// Parallax with scroll
-	Horizon.scroll(this.canvas2d, function(args) {
-		var factor = parseFloat($(this).data('factor')); // Here's our factor
-		return {left: args.x * factor};
-	});
+Horizon.scroll(img, function(args) {
+	return {left: args.x * 0.5};
 });
 ```
 
 If you want to see how `Canvas2D` is working in live, please [see this example](http://horizonjs.io/examples/canvas2d+scroll.html).
 
-Note : you should never set the `width` and `height` of your `canvas` element in CSS (unless you know what you're doing); instead define the node `width` and `height` attributes
+Notes :
+
+- you should never set the `width` and `height` of your `canvas` element in CSS (unless you know what you're doing); instead define the node's `width` and `height` attributes
+- `Canvas2dEngine.js` depends on `GsapEngine.js`, don't forget to include it
 
 ### Gyroscope
 
@@ -239,7 +214,7 @@ The node will translate from `200` to `600` when the Y axis is progressing from 
 - any integer value, with a unit or not
 - rgba()
 - hsla()
-- HTML colors (in the `#000000` form)
+- HTML colors (with the `#000000` form)
 
 ### Relative context
 
@@ -271,7 +246,13 @@ The available arguments are :
 Viewport/layout handling
 ------------------------
 
-The `Scroll` and `Mouse` plugins are limited in their X/Y axes by their technical behavior. There's no way we can go out of bounds. But that's not the case with, per example, the `Wheel` and `Swipe` plugins : we can have negative values, or values that are greater than your layout. Then, we could need to limit those values. It can be done with :
+The default scene used by Horizon is the `window`. But you can define another node as a scene :
+
+```js
+Horizon.setScene($('.block').node);
+```
+
+The `Scroll` and `Mouse` plugins are limited in their X/Y axes by their technical behavior. There's no way we can go out of bounds. But that's not the case with, per example, the `Wheel` and `Swipe` plugins : we can encounter values that are greater than the layout. We can limit the scene with :
 
 ```js
 Horizon.boundaries = true;
@@ -296,15 +277,13 @@ console.log(Horizon.viewport);
 console.log(Horizon.orientation);
 ```
 
-When your layout or viewport is modified (because the user has resized its browser or, per example, he changed his device orientation), Horizon's automatically detecting the new configuration by calling :
+When your layout or viewport is modified (because the user has resized its browser or, per example, he changed his device orientation), Horizon's automatically detecting the new configuration. But in some cases, please note that you may need to detect the new configuration by yourself :
 
 ```js
 Horizon.detectViewport();
 Horizon.detectLayout();
 Horizon.detectOrientation();
 ```
-
-But in some cases, please note that you may need to call these functions by yourself.
 
 Advanced use
 ------------
@@ -318,18 +297,27 @@ You can trigger any input with the X/Y values you want. It's really useful when 
 Horizon.setXY('scroll', {x: 100});
 ```
 
-### Disable plugins
+### Disable inputs
 
-You can disable plugins from rendering at any moment with :
+You can disable input plugins from rendering at any moment with :
 
 ```js
-Horizon.disablePlugin('mouse');
+Horizon.disableInput('mouse');
 ```
 
 And enable them again with :
 
 ```js
-Horizon.enablePlugin('mouse');
+Horizon.enableInput('mouse');
+```
+
+### Switch engine
+
+The last included engine will register itself as the current one to use. But if you want, you can switch the engine to use :
+
+```js
+// Horizon's currently using 'canvas2d' engine, let's change this!
+Horizon.setEngine('gsap');
 ```
 
 License
