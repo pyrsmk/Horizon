@@ -1,63 +1,3 @@
-// Prepare
-var scene,
-	images,
-	context,
-	redraw = false;
-
-// Drawing routine
-TweenLite.ticker.addEventListener('tick', function() {
-	if(!context || !redraw) {
-		return;
-	}
-	// Clear the scene
-	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-	// Draw images
-	for(var i=0, j=images.length; i<j; ++i) {
-		// Pre-render image
-		if(!('cache' in images[i])) {
-			if(!images[i].node.width) {
-				continue;
-			}
-			var c = document.createElement('canvas');
-			c.width = images[i].offsetWidth = images[i].naturalWidth = images[i].node.width;
-			c.height = images[i].offsetHeight = images[i].naturalHeight = images[i].node.height;
-			c.getContext('2d').drawImage(images[i].node, 0, 0);
-			images[i].cache = c;
-		}
-		// Save state
-		context.save();
-		// Scale image
-		if('scale' in images[i]) {
-			images[i].offsetWidth = images[i].naturalWidth * images[i].scale.x;
-			images[i].offsetHeight = images[i].naturalHeight * images[i].scale.y;
-			context.scale(images[i].scale.x, images[i].scale.y);
-		}
-		// Apply rotation
-		if('rotate' in images[i]) {
-			var x = images[i].left + (images[i].offsetWidth / 2),
-				y = images[i].top + (images[i].offsetHeight / 2);
-			context.translate(x, y);
-			context.rotate(images[i].rotate * Math.PI / 180);
-			context.translate(-x, -y);
-		}
-		// Apply opacity
-		if('opacity' in images[i]) {
-			context.globalAlpha = images[i].opacity;
-		}
-		// Update position
-		images[i].offsetLeft = images[i].left || 0;
-		images[i].offsetTop = images[i].top || 0;
-		// Draw image
-		context.drawImage(
-			images[i].cache,
-			images[i].offsetLeft,
-			images[i].offsetTop
-		);
-		// Restore state
-		context.restore();
-	}
-});
-
 // Register Canvas2D engine
 Horizon.registerEngine('canvas2d', function(args) {
 	if('easing' in args.properties) {
@@ -68,20 +8,76 @@ Horizon.registerEngine('canvas2d', function(args) {
 		args.properties.ease = args.easing;
 	}
 	args.properties.onUpdate = function() {
-		redraw = true;
+		args.node.scene.redraw = true;
 	};
 	TweenLite.to(args.node, args.duration, args.properties);
 });
 
 // Initialize the engine
-Horizon.initCanvas2D = function(_scene, _images) {
-	scene = _scene;
-	images = _images;
+Horizon.initCanvas2D = function(scene, images) {
+	// Init image objects
+	var context = scene.getContext('2d');
+	scene.redraw = false;
 	for(var i=0, j=images.length; i<j; ++i) {
+		images[i].scene = scene;
 		images[i].offsetLeft = images[i].left || 0;
 		images[i].offsetTop = images[i].top || 0;
 		images[i].offsetWidth = 0;
 		images[i].offsetHeight = 0;
 	}
-	context = scene.getContext('2d');
+	// Init drawing routine
+	TweenLite.ticker.addEventListener('tick', function() {
+		// Redraw or not
+		if(!context || !scene.redraw) {
+			return;
+		}
+		scene.redraw = false;
+		// Clear the scene
+		context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+		// Draw images
+		for(var i=0, j=images.length; i<j; ++i) {
+			// Pre-render image
+			if(!('cache' in images[i])) {
+				if(!images[i].node.width) {
+					continue;
+				}
+				var c = document.createElement('canvas');
+				c.width = images[i].offsetWidth = images[i].naturalWidth = images[i].node.width;
+				c.height = images[i].offsetHeight = images[i].naturalHeight = images[i].node.height;
+				c.getContext('2d').drawImage(images[i].node, 0, 0);
+				images[i].cache = c;
+			}
+			// Save state
+			context.save();
+			// Scale image
+			if('scale' in images[i]) {
+				images[i].offsetWidth = images[i].naturalWidth * images[i].scale.x;
+				images[i].offsetHeight = images[i].naturalHeight * images[i].scale.y;
+				context.scale(images[i].scale.x, images[i].scale.y);
+			}
+			// Apply rotation
+			if('rotate' in images[i]) {
+				var x = images[i].left + (images[i].offsetWidth / 2),
+					y = images[i].top + (images[i].offsetHeight / 2);
+				context.translate(x, y);
+				context.rotate(images[i].rotate * Math.PI / 180);
+				context.translate(-x, -y);
+			}
+			// Apply opacity
+			if('opacity' in images[i]) {
+				context.globalAlpha = images[i].opacity;
+			}
+			// Update position
+			images[i].offsetLeft = images[i].left || 0;
+			images[i].offsetTop = images[i].top || 0;
+			// Draw image
+			context.drawImage(
+				images[i].cache,
+				images[i].offsetLeft,
+				images[i].offsetTop
+			);
+			// Restore state
+			context.restore();
+		}
+	});
 };
