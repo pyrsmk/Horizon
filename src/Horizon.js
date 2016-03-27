@@ -1,4 +1,4 @@
-/*! Horizon 3.0.2 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 3.0.3 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js'),
 	Horizon = {};
