@@ -34,7 +34,6 @@
 			camera.position.z = 5;
 
 			var render = function () {
-				requestAnimationFrame( render );
 				renderer.render(scene, camera);
 			};
 			render();
@@ -42,8 +41,8 @@
 			Horizon.swipe(function(args) {
 				cube.rotation.x = -args.y / 100;
 				cube.rotation.y = -args.x / 100;
+				Horizon.requestAnimationFrame(render);
 			});
-			
 		</script>
 	</body>
 </html>

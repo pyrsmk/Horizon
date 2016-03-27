@@ -430,20 +430,15 @@ var Impetus = require('../node_modules/impetus/dist/impetus.js'),
 
 Horizon.registerInput('swipe', function(options) {
 	// Init Impetus
-	var options = options  || {},
-		render = function(x, y) {
-			return function() {
-				Horizon.render({
-					input: 'swipe',
-					x: -x,
-					y: -y,
-					duration: 0.25
-				});
-			};
-		};
+	var options = options  || {};
 	options.source = document;
 	options.update = function(x, y) {
-		Horizon.requestAnimationFrame(render(x, y));
+		Horizon.render({
+			input: 'swipe',
+			x: -x,
+			y: -y,
+			duration: 0.25
+		});
 	};
 	impetus = new Impetus(options);
 	// Add some CSS rules
