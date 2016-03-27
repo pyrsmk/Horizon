@@ -1,4 +1,4 @@
-Horizon 3.0.1
+Horizon 3.0.2
 =============
 
 Horizon is a parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
@@ -287,6 +287,18 @@ Horizon.detectOrientation();
 
 Advanced use
 ------------
+
+### Listen for parallax
+
+Sometimes you just need to listen to parallax events without running animations some node.
+
+```js
+Horizon.scroll(function(args) {
+	// Applying some tasks
+});
+```
+
+Note that you don't need to return any property.
 
 ### Trigger manual coords
 

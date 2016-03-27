@@ -1,4 +1,4 @@
-/*! Horizon 3.0.1 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 3.0.2 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js'),
 	Horizon = {};
@@ -133,10 +133,18 @@ Horizon.registerInput = function(name, constructor, setter) {
 		if(!(name in Horizon.callbacks)) {
 			Horizon.callbacks[name] = [];
 		}
-		Horizon.callbacks[name].push({
-			node: node,
-			callback: callback
-		});
+		if(typeof node == 'function') {
+			Horizon.callbacks[name].push({
+				node: {},
+				callback: node
+			});
+		}
+		else {
+			Horizon.callbacks[name].push({
+				node: node,
+				callback: callback
+			});
+		}
 	};
 };
 
