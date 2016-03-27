@@ -484,10 +484,10 @@ Horizon.render = function(args) {
 					};
 					// Define relative positions
 					if('offsetLeft' in element.node) {
-						left = element.node.offsetLeft;
-						top = element.node.offsetTop;
 						width = element.node.offsetWidth;
 						height = element.node.offsetHeight;
+						left = element.node.offsetLeft;
+						top = element.node.offsetTop;
 						params.left = left;
 						params.right = left - Horizon.viewport.width + width;
 						params.centerX = left - ((Horizon.viewport.width - width) / 2);
@@ -496,7 +496,7 @@ Horizon.render = function(args) {
 						params.centerY = top - ((Horizon.viewport.height - height) / 2);
 					}
 					// Limit x/y/z to the layout boundaries
-					if('x' in Horizon.boundaries) {
+					/*if('x' in Horizon.boundaries) {
 						if((params.x + width) > Horizon.boundaries.x[1]) {
 							params.x = Horizon.boundaries.x[1] - width;
 						}
@@ -505,12 +505,7 @@ Horizon.render = function(args) {
 						if((params.y + height) > Horizon.boundaries.y[1]) {
 							params.y = Horizon.boundaries.y[1] - height;
 						}
-					}
-					if('z' in Horizon.boundaries) {
-						if((params.z + height) > Horizon.boundaries.z[1]) {
-							params.z = Horizon.boundaries.z[1] - height;
-						}
-					}
+					}*/
 					// Populate options
 					properties = element.callback(params);
 					if(!properties) {
