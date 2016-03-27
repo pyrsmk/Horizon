@@ -483,23 +483,32 @@ Horizon.render = function(args) {
 						z: args.z
 					};
 					// Define relative positions
-					left = element.node.offsetLeft;
-					top = element.node.offsetTop;
-					width = element.node.offsetWidth;
-					height = element.node.offsetHeight;
-					params.left = left;
-					params.right = left - Horizon.viewport.width + width;
-					params.centerX = left - ((Horizon.viewport.width - width) / 2);
-					params.top = top;
-					params.bottom = top - Horizon.viewport.height + height;
-					params.centerY = top - ((Horizon.viewport.height - height) / 2);
-					// Limit x/y to the layout boundaries
-					if(Horizon.boundaries) {
-						if((params.x + width) > Horizon.layout.width) {
-							params.x = Horizon.layout.width - width;
+					if('offsetLeft' in element.node) {
+						left = element.node.offsetLeft;
+						top = element.node.offsetTop;
+						width = element.node.offsetWidth;
+						height = element.node.offsetHeight;
+						params.left = left;
+						params.right = left - Horizon.viewport.width + width;
+						params.centerX = left - ((Horizon.viewport.width - width) / 2);
+						params.top = top;
+						params.bottom = top - Horizon.viewport.height + height;
+						params.centerY = top - ((Horizon.viewport.height - height) / 2);
+					}
+					// Limit x/y/z to the layout boundaries
+					if('x' in Horizon.boundaries) {
+						if((params.x + width) > Horizon.boundaries.x[1]) {
+							params.x = Horizon.boundaries.x[1] - width;
 						}
-						if((params.y + height) > Horizon.layout.height) {
-							params.y = Horizon.layout.height - height;
+					}
+					if('y' in Horizon.boundaries) {
+						if((params.y + height) > Horizon.boundaries.y[1]) {
+							params.y = Horizon.boundaries.y[1] - height;
+						}
+					}
+					if('z' in Horizon.boundaries) {
+						if((params.z + height) > Horizon.boundaries.z[1]) {
+							params.z = Horizon.boundaries.z[1] - height;
 						}
 					}
 					// Populate options
