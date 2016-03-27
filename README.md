@@ -5,7 +5,6 @@ Horizon is a parallax animation library, aiming to be robust and as flexible as 
 
 It currently supports :
 
-- X/Y/Z axes
 - 2D/3D contexts
 - Scroll
 - Mouse
@@ -27,12 +26,13 @@ Pick Horizon and the needed plugins in the `build/` directory.
 Examples
 --------
 
-- [mouse input + background plugin](http://examples.horizonjs.io/mouse+background.html)
-- [scroll input + relative interpolations](http://examples.horizonjs.io/scroll+relative.html)
-- [swipe input + 3D](http://examples.horizonjs.io/swipe+3d.html)
-- [mouse wheel input + HSLA parallaxing](http://examples.horizonjs.io/wheel+hsla.html)
-- [gyroscope input + swipe input](http://examples.horizonjs.io/gyro+swipe.html)
-- [canvas2d + scroll input](http://examples.horizonjs.io/canvas2d+scroll.html)
+- [Mouse input](http://examples.horizonjs.io/mouse+scene.html)
+- [Scroll input + relative interpolations](http://examples.horizonjs.io/scroll+relative.html)
+- [Mouse Wheel input + HSLA parallaxing](http://examples.horizonjs.io/wheel+hsla.html)
+- [Gyroscope input + Swipe input](http://examples.horizonjs.io/gyroscope+swipe.html)
+- [Scroll + Canvas2d](http://examples.horizonjs.io/scroll+canvas2d.html)
+- [Swipe input + Transforms3D](http://examples.horizonjs.io/swipe+transforms3d.html)
+- [Swipe + WebGL](http://examples.horizonjs.io/swipe+webgl.html)
 
 Basics
 ------
