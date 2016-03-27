@@ -1,4 +1,4 @@
-/*! Horizon 3.0.3 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 4.0.0 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js'),
 	Horizon = {};
@@ -189,11 +189,11 @@ Horizon.enableInput = function(name) {
 
 	Parameters
 		String name
-		Object options
+		Object coords
 */
-Horizon.setXY = function(name, options) {
+Horizon.setCoords = function(name, coords) {
 	if(typeof Horizon.inputs[name].setter == 'function') {
-		Horizon.inputs[name].setter(options);
+		Horizon.inputs[name].setter(coords);
 	}
 };
 

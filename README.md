@@ -307,7 +307,7 @@ You can trigger any input with the X/Y values you want. It's really useful when 
 
 ```js
 // Scroll to 100 on the X axis
-Horizon.setXY('scroll', {x: 100});
+Horizon.setCoords('scroll', {x: 100});
 ```
 
 ### Disable inputs
