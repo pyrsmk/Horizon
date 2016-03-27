@@ -1,4 +1,4 @@
-Horizon 3.0.3
+Horizon 4.0.0
 =============
 
 Horizon is a parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).

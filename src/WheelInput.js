@@ -21,6 +21,7 @@ Horizon.registerInput('wheel', function() {
 				context: 'relative',
 				x: y,
 				y: y,
+				z: y,
 				duration: 0.5
 			});
 		}

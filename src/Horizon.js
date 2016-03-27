@@ -16,7 +16,7 @@ Horizon.disabled_inputs = [];
 Horizon.viewport = {width: 0, height: 0};
 Horizon.layout = {width: 0, height: 0};
 Horizon.orientation = 'landscape';
-Horizon.boundaries = false;
+Horizon.boundaries = {};
 Horizon.regex = {
 	unit: /(\d+(?:\.\d+)?)([a-z]+|%)/i,
 	list: /^(?:\s*([\w.]+)\s*)(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?(?:\s*([\w.]+)\s*)?$/,
@@ -439,19 +439,29 @@ Horizon.render = function(args) {
 		args.y = Horizon.y + args.y;
 		args.z = Horizon.z + args.z;
 	}
-	// Limit x/y to the layout boundaries
-	if(Horizon.boundaries) {
-		if(args.x < 0) {
-			args.x = 0;
+	// Limit x/y/z to the boundaries
+	if('x' in Horizon.boundaries) {
+		if(args.x < Horizon.boundaries.x[0]) {
+			args.x = Horizon.boundaries.x[0];
 		}
-		else if(args.x > Horizon.layout.width) {
-			args.x = Horizon.layout.width;
+		else if(args.x > Horizon.boundaries.x[1]) {
+			args.x = Horizon.boundaries.x[1];
 		}
-		if(args.y < 0) {
-			args.y = 0;
+	}
+	if('y' in Horizon.boundaries) {
+		if(args.y < Horizon.boundaries.y[0]) {
+			args.y = Horizon.boundaries.y[0];
 		}
-		else if(args.y > Horizon.layout.height) {
-			args.y = Horizon.layout.height;
+		else if(args.y > Horizon.boundaries.y[1]) {
+			args.y = Horizon.boundaries.y[1];
+		}
+	}
+	if('z' in Horizon.boundaries) {
+		if(args.z < Horizon.boundaries.z[0]) {
+			args.z = Horizon.boundaries.z[0];
+		}
+		else if(args.z > Horizon.boundaries.z[1]) {
+			args.z = Horizon.boundaries.z[1];
 		}
 	}
 	// Generate animations
