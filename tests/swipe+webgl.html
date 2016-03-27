@@ -1,0 +1,49 @@
+<html>
+	<head>
+		<title>Horizon</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				margin: 0;
+			}
+			
+			canvas {
+				width: 100%;
+				height: 100%
+			}
+		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r75/three.min.js"></script>
+		<script src="../build/unminified/Horizon.js"></script>
+		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/SwipeInput.js"></script>
+	</head>
+	<body>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+			var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+			var cube = new THREE.Mesh( geometry, material );
+			scene.add( cube );
+
+			camera.position.z = 5;
+
+			var render = function () {
+				requestAnimationFrame( render );
+				renderer.render(scene, camera);
+			};
+			render();
+			
+			Horizon.swipe(function(args) {
+				cube.rotation.x = -args.y / 100;
+				cube.rotation.y = -args.x / 100;
+			});
+			
+		</script>
+	</body>
+</html>
