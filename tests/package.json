@@ -1,5 +1,6 @@
 {
   "devDependencies": {
-    "pyrsmk-quark": "^2.0.0"
+    "pyrsmk-quark": "^2.0.0",
+    "quarky": "^1.0.5"
   }
 }

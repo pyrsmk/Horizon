@@ -127,7 +127,8 @@ If needed, you can initialize this plugin with arguments for [Impetus](https://g
 ```js
 // Limit the Y axis when swiping
 Horizon.initInput('swipe', {
-	boundY: [-Horizon.layout.height, 0]
+	boundX: [0, Horizon.layout.width],
+	boundY: [0, Horizon.layout.height]
 });
 ```
 

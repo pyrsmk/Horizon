@@ -435,8 +435,8 @@ Horizon.registerInput('swipe', function(options) {
 	options.update = function(x, y) {
 		Horizon.render({
 			input: 'swipe',
-			x: -x,
-			y: -y,
+			x: x,
+			y: y,
 			duration: 0.25
 		});
 	};
@@ -446,7 +446,7 @@ Horizon.registerInput('swipe', function(options) {
 	Horizon.addCSSRule('body:active', 'cursor: -moz-grabbing; cursor: -webkit-grabbing; cursor: grabbing;');
 }, function(args) {
 	args.render = 'render' in args ? args.render : false;
-	impetus.setValues(-args.x, -args.y);
+	impetus.setValues(args.x, args.y);
 	if(args.render) {
 		Horizon.render({
 			input: 'swipe',
