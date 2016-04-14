@@ -1,6 +1,6 @@
 {
   "name": "pyrsmk-horizon",
-  "description": "2D/3D parallax library",
+  "description": "The next generation parallax library",
   "version": "4.0.0",
   "author": "Aurélien Delogu <pyrsmk@dreamysource.fr> (http://dreamysource.fr)",
   "repository": {
@@ -13,7 +13,6 @@
     "animation",
     "2D",
     "3D",
-    "es6",
     "swipe",
     "touch",
     "gyroscope",

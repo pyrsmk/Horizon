@@ -1,15 +1,14 @@
 require('../node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js');
 
-var disable_rendering = false;
+var disableRendering = false;
 
-Horizon.registerInput('scroll', function() {
-	
-	// Define rendering function
-	var render = function() {
-		if(!disable_rendering) {
-			var x,
-				y;
-			if(Horizon.scene === window) {
+Horizon._registerInput('scroll', {
+	constructor: function(horizon, options) {
+		// Define rendering function
+		var render = function() {
+			var x, y;
+			// Define x/y coords
+			if(horizon.getScene() === document) {
 				x = window.pageXOffset ||
 					('documentElement' in document ? document.documentElement.scrollLeft : 0) ||
 					('body' in document ? document.body.scrollLeft : 0);
@@ -18,36 +17,61 @@ Horizon.registerInput('scroll', function() {
 					('body' in document ? document.body.scrollTop : 0);
 			}
 			else {
-				x = Horizon.scene.scrollLeft;
-				y = Horizon.scene.scrollTop;
+				x = horizon.getScene().scrollLeft;
+				y = horizon.getScene().scrollTop;
 			}
-			Horizon.render({
-				input: 'scroll',
+			// Render
+			horizon.render({
+				trigger: 'scroll',
+				caller: 'scroll',
 				x: x,
 				y: y,
-				duration: 0.5
+				duration: 500
 			});
+		};
+		// Listen to scroll event
+		Horizon._listen(['scroll'], horizon.getScene(), function(e) {
+			if(!disableRendering) {
+				Horizon._requestAnimationFrame(render);
+			}
+		});
+	},
+	setter: function(horizon, coords) {
+		// Avoid rendering when setting scroll position
+		disableRendering = true;
+		// Get scene
+		var scene = horizon.getScene();
+		if(scene === document) {
+			scene = window;
 		}
-	};
-	
-	// Listen to scroll event
-	Horizon.listen(['scroll'], Horizon.scene, function(e) {
-		Horizon.requestAnimationFrame(render);
-	});
-
-}, function(args) {
-	
-	args.render = 'render' in args ? args.render : false;
-	
-	if(!args.render) {
-		disable_rendering = true;
+		// Set scroll position
+		TweenLite.to(scene, 0.01, {
+			scrollTo: coords,
+			onComplete: function() {
+				// Avoid scroll event because the browser seems to continue to trigger it for some time
+				setTimeout(function() {
+					// Re-enable rendering
+					disableRendering = false;
+				}, 100);
+			}
+		});
 	}
-	
-	TweenLite.to(window, 0.5, {
-		scrollTo: args,
-		onComplete: function() {
-			disable_rendering = false;
+});
+
+// Add smooth scroll
+Horizon._registerPlugin(function(horizon) {
+	horizon.smoothScroll = function(coords) {
+		// Get scene
+		var scene = horizon.getScene();
+		if(scene === document) {
+			scene = window;
 		}
-	});
-	
+		// Run animation
+		TweenLite.to(scene, 0.5, {
+			scrollTo: coords,
+			onComplete: function() {
+				horizon.setCoords(coords);
+			}
+		});
+	};
 });

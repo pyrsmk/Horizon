@@ -20,8 +20,9 @@
 			}
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
+		<script src="node_modules/quarky/quarky.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
-		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/GsapRenderer.js"></script>
 		<script src="../build/unminified/GyroscopeInput.js"></script>
 		<script src="../build/unminified/SwipeInput.js"></script>
 	</head>
@@ -30,23 +31,23 @@
 		<script>
 			var $ = quark.$,
 				$$ = quark.$$,
-				$block = quark.$('.block');
+				$block = quark.$('.block'),
+				horizon = new Horizon();
 			
-			Horizon.boundaries = true;
-			
-			Horizon.initInput('swipe', {
-				boundX: [0, Horizon.layout.width],
-				boundY: [0, Horizon.layout.height]
+			horizon.setBoundaries({
+				x: [0, horizon.getSceneWidth() - $block.width()],
+				y: [0, horizon.getSceneHeight() - $block.height()]
 			});
-			Horizon.setXY('swipe', {x: 100, y: 100});
 			
-			Horizon.parallax(['gyro', 'swipe'], $block.node, function(args) {
+			horizon.parallax(['gyroscope', 'swipe'], $block.node, function(coords) {
 				return {
-					left: args.x,
-					top: args.y,
-					rotation: args.z
+					left: coords.x,
+					top: coords.y,
+					rotation: coords.z
 				};
 			});
+			
+			horizon.setCoords({x: 100, y: 100});
 		</script>
 	</body>
 </html>

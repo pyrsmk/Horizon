@@ -44,7 +44,7 @@
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
-		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/GsapRenderer.js"></script>
 		<script src="../build/unminified/SwipeInput.js"></script>
 	</head>
 	<body>
@@ -61,12 +61,13 @@
 		<script>
 			
 			var $ = quark.$,
-				$$ = quark.$$;
+				$$ = quark.$$,
+				horizon = new Horizon();
 			
-			Horizon.swipe($('.container__object').node, function(args) {
+			horizon.swipe($('.container__object').node, function(coords) {
 				return {
-					rotationX: args.y,
-					rotationY: -args.x
+					rotationX: coords.y,
+					rotationY: -coords.x
 				};
 			});
 			

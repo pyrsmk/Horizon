@@ -1,17 +1,17 @@
 Horizon 4.0.0
 =============
 
-Horizon is a parallax animation library, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
+Horizon is a parallax engine, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
 
 It currently supports :
 
-- 2D/3D contexts
 - Scroll
-- Mouse
+- Mouse position
 - Mouse wheel
-- Swipe (with mouse and touch events)
-- Canvas2D engine
-- Gyroscope (experimental)
+- Swiping (with mouse and touch events)
+- Canvas2D renderer
+- Gyroscope
+- WebGL
 
 Install
 -------
@@ -21,7 +21,27 @@ npm install pyrsmk-horizon
 bower install pyrsmk-horizon
 ```
 
-Pick Horizon and the needed plugins in the `build/` directory.
+Pick Horizon and the needed plugins in the `build/` directory. Please note that you must include `Horizon` first, and `GsapRenderer` plugin should always be included.
+
+New things in v4
+----------------
+
+Many things in the API have moved since v3. Please read carefully the documentation to know what has changed.
+
+Future commercial license with the upcoming v5
+----------------------------------------------
+
+Please note that Horizon is currently completely free until v5. When the v5 will be out, Horizon will remain free for personal use only. The version will have many improvements :
+
+- GSAP will be replaced by an internal engine, without any performance loss (about ~70ko tinier)
+- new SVG engine
+- new HTML plugin (so you won't need to write any JS line)
+- new Text engine (so you'll can animate text)
+- and many more...
+
+Moreover, a website will be released too with a custom bundler to have the library that fits your needs!
+
+And if you're wondering why a commercial license is needed, you can read this [interesting paper from GreenSock](http://greensock.com/why-license) ;)
 
 Examples
 --------
@@ -37,121 +57,357 @@ Examples
 Basics
 ------
 
-Parallax is a state applied to an element according to the state of an input (like the scroll or the mouse). Horizon applies that simple principle to its API. You just need to know the input to handle (supported by Horizon's plugins) and the node to animate :
+Parallax is a state applied to an element according to the state of an input (like the scroll or the mouse). Horizon applies that simple principle to its API. You just need to know the input to handle (supported by Horizon's plugins) and the node to animate. But first, let's create an Horizon object with the scene we want to handle :
 
 ```js
-Horizon.scroll($('.square')[0], function(args) {
+var horizon = new Horizon($('.scene')[0]);
+```
+
+The scene parameter is optional and Horizon will default to `document`. Now we can handle our parallax on some elements :
+
+```js
+horizon.scroll($('.square')[0], function(coords) {
 	return {
-		top: args.x,
-		left: args.y
+		top: coords.x,
+		left: coords.y
 	};
 });
 ```
 
-Here, the `Scroll` plugin is passing its axis values through the `args` argument. As you may see, you can easily specify X axis for an Y coord property, and vice versa.
-
-The returned properties are applied to the element by [GSAP](http://greensock.com/gsap), a highly optimized animation library. To know how properties are handled by GSAP, please refer to the [documentation](http://greensock.com/docs/#/HTML5/GSAP/Plugins/CSSPlugin/). If needed, you can override the `duration` and `ease` parameters.
-
-If needed, you can specify several plugins at once :
+The returned properties are applied to the element by the renderer. To know how properties are handled by GSAP (the default Horizon's renderer), please refer to the [documentation](http://greensock.com/docs/#/HTML5/GSAP/Plugins/CSSPlugin/). If needed, you can override the `duration` and `easing` parameters by returning them with the properties.
 
 ```js
-Horizon.parallax(['scroll', 'mouse'], node, function(args) {
-	// blah blah
+horizon.scroll($('.square')[0], function(coords) {
+	return {
+		top: coords.y,
+		duration: 1500
+	};
 });
 ```
 
-Horizon is working with the whole document as a scene. It means you currently can't wrap the scene in a node. But we've planned to support it in the far future.
+If you want to handle several inputs for the same element, use :
 
-Plugins
--------
+```js
+horizon.parallax(['scroll', 'mouse'], node, function(coords) {
+	return {
+		top: coords.y
+	};
+});
+```
+
+Note that passing a `node` parameter is not needed when you're calling input parallax functions, because you could just need to listen to parallax events.
+
+```js
+horizon.scroll(function(coords) {
+	// Apply some actions according to the passed coords
+});
+```
+
+The `coords` argument
+---------------------
+
+There's several values that are passed in this argument that you need to know :
+
+- x : the absolute X coordinate
+- y : the absolute Y coordinate
+- z : the absolute Z coordinate
+- relativeX : the relative X coordinate
+- relativeY : the relative Y coordinate
+- relativeZ : the relative Z coordinate
+
+But there's also arguments for the relative context (see the `Interpolations` section below) :
+
+- left : the position where the left of the block crosses the left of the viewport
+- right : the position where the right of the block crosses the right of the viewport
+- top : the position where the top of the block crosses the top of the viewport
+- bottom : the position where the bottom of the block crosses the bottom of the viewport
+- centerX : the position where the center of the block crosses the center of the viewport on the X axis
+- centerY : the position where the center of the block crosses the center of the viewport on the Y axis
+
+The scene
+---------
+
+The scene is where events are listened and your elements rendered. You can retrieve it with :
+
+```js
+horizon.getScene();
+```
+
+### Set manual coords
+
+You can change the coords of your scene (and the state of the attached inputs) :
+
+```js
+horizon.setCoords({x: 100});
+```
+
+Note that if, per example, the scroll input is attached to your scene, then the scroll will move to the position of `100px` too.
+
+You can get the current scene coords with :
+
+```js
+horizon.getCoords();
+```
+
+### Set boundaries
+
+The `Scroll` and `Mouse` plugins are limited in their X/Y axes by their technical behavior. There's no way we can go out of bounds. But that's not the case with, per example, the `Wheel` and `Swipe` plugins : we can encounter values that are greater than the layout. According to your needs, you can limit your scene with :
+
+```js
+// The X axis will be limited from 0 to 1600
+horizon.setBoundaries({
+	x: [0, 1600]
+});
+```
+
+Boundaries can be applied to `x`, `y` and `z` axes.
+
+You can get the current boundaries with :
+
+```js
+horizon.getBoundaries();
+```
+
+### Scene dimensions
+
+The scene dimensions are used internally by Horizon to know how compute many things (like the relative context for interpolations). The dimensions are automatically detected when the viewport is resized, but you could need to trigger it by yourself (after you made some manual changes to the scene, per example) :
+
+```js
+horizon.detectSceneDimensions();
+```
+
+You can retrieve these dimensions with :
+
+```js
+horizon.getSceneWidth();
+horizon.getSceneHeight();
+```
+
+Interpolations
+--------------
 
 ### Basics
 
-Plugins are automatically registered, and initialized when parallax callbacks are registered. Sometimes, you may want to initialize them by yourself for, per example, pass options to them. See the `Swipe` section to have a look at how to do it.
-
-Each example in this section is provided with the supported axes returned by the plugin. Unused axes
-
-### Scroll
+Now, we know how to use each kind of plugin and how to set parallax. But how can we set complex animations like we can do with CSS `keyframes`? Horizon's covering this behavior with its `interpolate()` method.
 
 ```js
-Horizon.scroll(node, function(args) {
+horizon.swipe(node, function(coords) {
+	return Horizon.interpolate(coords.y, {
+		0: {top: 200},
+		100: {top: 600},
+		300: {top: 300}
+	});
+});
+```
+
+The node will translate from `200` to `600` when the Y axis is progressing from `0` to `100`, then the node is going back to `300`.
+
+### Which values are interpolated?
+
+- any integer value, with a unit or not
+- rgba()
+- hsla()
+- HTML colors (with the `#000000` form)
+
+### Relative context
+
+First, [take a look at this example](http://examples.horizonjs.io/scroll+relative.html) (scroll down the page to see the block in action).
+
+Relative context is useful when you want to create interpolations based on the position of your block compared to your scene. We can accomplish this by using relative arguments passed in the `coords` argument?
+
+```js
+horizon.scroll(node, function(coords) {
+	var interpolations = {};
+	
+	interpolations[coords.centerY - 300] = {scaleX: 1, opacity: 0};
+	interpolations[coords.centerY] = {scaleX: 5, opacity: 1};
+	interpolations[coords.centerY + 300] = {scaleX: 1, opacity: 0};
+	
+	return Horizon.interpolate(coords.y, interpolations);
+});
+```
+
+The inputs
+----------
+
+### Basics
+
+An in put is basically input events that Horizon is listening to. When a change is seen, parallax functions are triggered. If you're using several inputs in a Horizon object, all inputs state are changed to follow the global scene. That means if the scroll is triggered, and you're using the swipe input too, then the coordinates of the scroll input are applied to the swipe input. Then, all input states are centralized and Horizon keeps reliable.
+
+### Disable inputs
+
+You can disable input plugins from rendering at any moment with :
+
+```js
+horizon.disableInput('mouse');
+```
+
+And enable them again with :
+
+```js
+horizon.enableInput('mouse');
+```
+
+### Scroll input
+
+```js
+horizon.scroll(node, function(coords) {
 	return {
-		left: args.x,
-		top: args.y
+		left: coords.x,
+		top: coords.y
 	};
 });
 ```
 
-If needed, you can initialize this plugin with the `node` to listen.
+If you want to smooth scroll to a specific position :
 
 ```js
-Horizon.initInput('scroll', $('.container')[0]);
+horizon.smoothScroll({y: 500});
 ```
 
-### Mouse
+### Mouse input
 
 ```js
-Horizon.mouse(node, function(args) {
+horizon.mouse(node, function(coords) {
 	return {
-		left: args.x,
-		top: args.y
+		left: coords.x,
+		top: coords.y
 	};
 });
 ```
 
-### Mouse wheel
+### Mouse wheel input
 
-Here, `args.x` has the same value as `args.y`.
+Here, only the `Y` axis is returned.
 
 ```js
-Horizon.wheel(node, function(args) {
+horizon.wheel(node, function(coords) {
 	return {
-		top: args.y
+		top: coords.y
 	};
 });
 ```
 
-### Swipe
+### Swipe input
 
 ```js
-Horizon.swipe(node, function(args) {
+horizon.swipe(node, function(coords) {
 	return {
-		left: args.x,
-		top: args.y
+		left: coords.x,
+		top: coords.y
 	};
 });
 ```
 
-If needed, you can initialize this plugin with arguments for [Impetus](https://github.com/chrisbateman/impetus).
+If needed, you can initialize this plugin with arguments for [Impetus](https://github.com/chrisbateman/impetus) before calling `horizon.swipe()`. Note that `source`, `update`, `boundX` and `boundY` cannot be set since Horizon automatically handle them.
 
 ```js
-// Limit the Y axis when swiping
-Horizon.initInput('swipe', {
-	boundX: [0, Horizon.layout.width],
-	boundY: [0, Horizon.layout.height]
+horizon.initInput('swipe', options);
+```
+
+### Gyroscope input
+
+```js
+horizon.gyroscope(node, function(coords) {
+	return {
+		left: coords.x,
+		top: coords.y,
+		rotation: coords.z
+	};
 });
 ```
 
-### Canvas2D
+The gyroscope input adds a method to Horizon to know if the gyroscope is supported by the current device : `horizon.isGyroscopeSupported()`.
 
-The `Canvas2D` engine is known to be really efficient and we chose to implement it in Horizon, so you can use it to display parallaxed images powered by hardware acceleration.
+### WebGL
 
-The way you can run it in Horizon is a bit different than the other plugins. First, define your `canvas` element and the images to load.
+There's no `WebGL` input because you can handle it directly with the default renderer. Just load the library you want to use for your WebGL context (often [three.js](http://threejs.org)) and apply simple parallax :
+
+```js
+horizon.swipe(function(coords) {
+	cube.rotation.x = -coords.y / 100;
+	cube.rotation.y = -coords.x / 100;
+	// Call your routine rendering function
+	render();
+});
+```
+
+Take a look at the source of this [simple example](http://examples.horizonjs.io/swipe+webgl.html) to better see how it's working.
+
+The renderers
+-------------
+
+The renderer is the engine that will renderer your parallaxed elements. There are several available renderers in Horizon.
+
+### Set the default renderer
+
+If you want to use another renderer than the default one you can change it with :
+
+```js
+Horizon.setDefaultRenderer('canvas2d');
+```
+
+### Set renderer for a specific animation
+
+Sometimes, you need to run an animation with a specific renderer, not the default one. Let's say we're using the `canvas2d` renderer as by default and we want to apply a parallax effect with the `GSAP` renderer :
+
+```js
+horizon.scroll(node, function(coords) {
+	return {
+		left: coords.x,
+		renderer: 'gsap'
+	};
+});
+```
+
+### GSAP renderer
+
+The GSAP renderer is the default renderer used by Horizon. Please read this [documentation page](http://greensock.com/docs/#/HTML5/GSAP/Plugins/CSSPlugin/) to learn more about how it's working.
+
+### Canvas2D renderer
+
+The `Canvas2D` renderer is known to be really efficient and we chose to implement it in Horizon, so you can use it to display parallaxed images powered by hardware acceleration. But note that even if Canvas2D is well supported in desktop browsers, that's not the case under mobile browsers. Then, we advise you to switch from the Canvas2D renderer to the GSAP renderer in a mobile context.
+
+The Canvas2D plugin adds a method to Horizon to know if it's supported or not by the current browser :
+
+```js
+horizon.isCanvasSupported();
+```
+
+That's said, let's define our `canvas` element and an image to load :
 
 ```html
 <img src="images/img.jpg" style="display: none;">
-<canvas class="scene" width="600" height="600"></canvas>
+<canvas width="600" height="600"></canvas>
 ```
 
-Then, you need to register the scene and the objects to animate (for Canvas2D we're creating manual objects, we won't pass the image nodes directly).
+Now, you need to register the scene :
 
 ```js
-var img = {
-	node: $('img')[0],
-	left: 0
-};
+var scene = $('canvas')[0];
 
-Horizon.initCanvas2D($('.scene')[0], [img]);
+// Init the scene
+horizon.initCanvas2D(scene);
+```
+
+Calling `initCanvas2D()` on a scene will append some methods to it, as you will see. Let's add an image to the scene (for Canvas2D we're creating manual objects, we won't pass the image nodes directly) :
+
+```js
+scene.addImage($('img')[0], {left: 0});
+```
+
+The renderer also supports image order by accepting an index as the third parameter of `addImage()`. It allows the user to load its images asynchronously and keeps the index of each image when drawing them on the canvas.
+
+You can remove a previously added image too by passing its index :
+
+```js
+scene.removeImage(10);
+```
+
+Or clear all images directly :
+
+```js
+scene.clearImages();
 ```
 
 Please note that all usual properties that we can animate with the other plugins are not supported. Here's the available ones :
@@ -163,175 +419,27 @@ Please note that all usual properties that we can animate with the other plugins
 - opacity : float (between 0 and 1)
 
 ```js
-Horizon.scroll(img, function(args) {
-	return {left: args.x * 0.5};
+horizon.scroll(img, function(coords) {
+	return {left: coords.x * 0.5};
 });
 ```
 
-If you want to see how `Canvas2D` is working in live, please [see this example](http://horizonjs.io/examples/canvas2d+scroll.html).
+If you want to see how `Canvas2D` is working in live, please [see this example](http://examples.horizonjs.io/scroll+canvas2d.html).
 
-Notes :
+Note : you should never set the `width` and `height` of your `canvas` element in CSS (unless you know what you're doing); instead define the node's `width` and `height` attributes.
 
-- you should never set the `width` and `height` of your `canvas` element in CSS (unless you know what you're doing); instead define the node's `width` and `height` attributes
-- `Canvas2dEngine.js` depends on `GsapEngine.js`, don't forget to include it
+Manual rendering
+----------------
 
-### Gyroscope
+You can render your scene by simply calling `horizon.render()`. Here's the available options (all optionals) :
 
-The gyroscope is an experimental feature in Horizon. And it will probably stay experimental as it seems there's no consistant API for the time. In fact, the axis of the physical gyroscope is fixed on the device while the axis based on the screen rotation is not fixed at all, then the returned X/Y values aren't always reliable.
-
-```js
-Horizon.gyro(node, function(args) {
-	return {
-		left: args.x,
-		top: args.y,
-		rotation: args.z
-	};
-});
-```
-
-We also advise you to set `Horizon.boundaries` to `true`.
-
-Interpolations
---------------
-
-### Basics
-
-Now, we know how to use each kind of plugin and how to set simple parallaxes. But how can we set complex animations like we can do with CSS `keyframes`? Horizon's covering this behavior with its `interpolate()` method. We can create interpolations by setting the current position from the input, and the interpolations themselves.
-
-```js
-Horizon.swipe(node, function(args) {
-	return Horizon.interpolate(args.y, {
-		0: {top: 200},
-		100: {top: 600},
-		300: {top: 300}
-	});
-});
-```
-
-The node will translate from `200` to `600` when the Y axis is progressing from `0` to `100`, and the node is going back to `300`.
-
-### Which values are interpolated?
-
-- any integer value, with a unit or not
-- rgba()
-- hsla()
-- HTML colors (with the `#000000` form)
-
-### Relative context
-
-First, [take a look at this example](http://horizonjs.io/examples/scroll+relative.html) (scroll down the page to see the block in action).
-
-Relative context is useful when you want to create interpolations based on the position of your block against the viewport. We can accomplish that by using relative arguments passed by the plugin.
-
-```js
-Horizon.scroll(node, function(args) {
-	var interpolations = {};
-	
-	interpolations[args.centerY - 300] = {scaleX: 1, opacity: 0};
-	interpolations[args.centerY] = {scaleX: 5, opacity: 1};
-	interpolations[args.centerY + 300] = {scaleX: 1, opacity: 0};
-	
-	return Horizon.interpolate(args.y, interpolations);
-});
-```
-
-The available arguments are :
-
-- left : the position where the left of the block crosses the left of the viewport
-- right : the position where the right of the block crosses the right of the viewport
-- top : the position where the top of the block crosses the top of the viewport
-- bottom : the position where the bottom of the block crosses the bottom of the viewport
-- centerX : the position where the center of the block crosses the center of the viewport on the X axis
-- centerY : the position where the center of the block crosses the center of the viewport on the Y axis
-
-Viewport/layout handling
-------------------------
-
-The default scene used by Horizon is the `window`. But you can define another node as a scene :
-
-```js
-Horizon.setScene($('.block').node);
-```
-
-The `Scroll` and `Mouse` plugins are limited in their X/Y axes by their technical behavior. There's no way we can go out of bounds. But that's not the case with, per example, the `Wheel` and `Swipe` plugins : we can encounter values that are greater than the layout. We can limit the scene with :
-
-```js
-Horizon.boundaries = true;
-```
-
-The layout is automatically computed by Horizon, but the values can be wrong, depending on your configuration. You can fix them like this :
-
-```js
-Horizon.layout = {
-	width: 1500,
-	height: 200
-};
-```
-
-If needed you can access some viewport values :
-
-```js
-// Will echo, per example, {width: 1920, height: 1080}
-console.log(Horizon.viewport);
-
-// Will echo 'portrait' or 'landscape'
-console.log(Horizon.orientation);
-```
-
-When your layout or viewport is modified (because the user has resized its browser or, per example, he changed his device orientation), Horizon's automatically detecting the new configuration. But in some cases, please note that you may need to detect the new configuration by yourself :
-
-```js
-Horizon.detectViewport();
-Horizon.detectLayout();
-Horizon.detectOrientation();
-```
-
-Advanced use
-------------
-
-### Listen for parallax
-
-Sometimes you just need to listen to parallax events without running animations some node.
-
-```js
-Horizon.scroll(function(args) {
-	// Applying some tasks
-});
-```
-
-Note that you don't need to return any property.
-
-### Trigger manual coords
-
-You can trigger any input with the X/Y values you want. It's really useful when you need to centralize several inputs coords, per example.
-
-```js
-// Scroll to 100 on the X axis
-Horizon.setCoords('scroll', {x: 100});
-```
-
-### Disable inputs
-
-You can disable input plugins from rendering at any moment with :
-
-```js
-Horizon.disableInput('mouse');
-```
-
-And enable them again with :
-
-```js
-Horizon.enableInput('mouse');
-```
-
-### Switch engine
-
-The last included engine will register itself as the current one to use. But if you want, you can switch the engine to use :
-
-```js
-// Horizon's currently using 'canvas2d' engine, let's change this!
-Horizon.setEngine('gsap');
-```
+- x : X coordinate to render
+- y : Y coordinate to render
+- z : Z coordinate to render
+- duration : the duration in ms
+- easing : the easing to apply (see this [page](http://greensock.com/docs/#/HTML5/GSAP/Easing/))
+- trigger : the specific input to trigger
+- complete : a callback which will be called when the rendering is complete
 
 License
 -------

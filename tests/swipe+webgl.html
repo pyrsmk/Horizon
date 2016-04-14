@@ -14,7 +14,7 @@
 		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r75/three.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
-		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/GsapRenderer.js"></script>
 		<script src="../build/unminified/SwipeInput.js"></script>
 		<script src="../build/unminified/WheelInput.js"></script>
 	</head>
@@ -39,18 +39,19 @@
 			};
 			render();
 			
-			Horizon.swipe(function(args) {
-				cube.rotation.x = -args.y / 100;
-				cube.rotation.y = -args.x / 100;
-				Horizon.requestAnimationFrame(render);
+			var horizon = new Horizon();
+			horizon.setBoundaries({z: [150, 1400]});
+			horizon.setCoords({z: 500});
+			
+			horizon.swipe(function(coords) {
+				cube.rotation.x = -coords.y / 100;
+				cube.rotation.y = -coords.x / 100;
+				render();
 			});
 			
-			Horizon.z = 500;
-			Horizon.boundaries.z = [150, 1400];
-			
-			Horizon.wheel(function(args) {
-				camera.position.z = args.z / 100;
-				Horizon.requestAnimationFrame(render);
+			horizon.wheel(function(coords) {
+				camera.position.z = coords.y / 100;
+				render();
 			});
 		</script>
 	</body>

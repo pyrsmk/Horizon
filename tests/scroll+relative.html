@@ -20,7 +20,7 @@
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
-		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/GsapRenderer.js"></script>
 		<script src="../build/unminified/ScrollInput.js"></script>
 	</head>
 	<body>
@@ -28,14 +28,15 @@
 		<script>
 			
 			var $ = quark.$,
-				$$ = quark.$$;
+				$$ = quark.$$,
+				horizon = new Horizon();
 			
-			Horizon.scroll($('.rectangle').node, function(args) {
+			horizon.scroll($('.rectangle').node, function(coords) {
 				var interpolations = {};
-				interpolations[args.centerY - 300] = {scaleX: 1, opacity: 0};
-				interpolations[args.centerY] = {scaleX: 5, opacity: 1};
-				interpolations[args.centerY + 300] = {scaleX: 1, opacity: 0};
-				var data = Horizon.interpolate(args.y, interpolations);
+				interpolations[coords.centerY - 300] = {scaleX: 1, opacity: 0};
+				interpolations[coords.centerY] = {scaleX: 5, opacity: 1};
+				interpolations[coords.centerY + 300] = {scaleX: 1, opacity: 0};
+				var data = horizon.interpolate(coords.y, interpolations);
 				return data;
 			});
 			

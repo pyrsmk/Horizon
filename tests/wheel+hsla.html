@@ -36,7 +36,7 @@
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
-		<script src="../build/unminified/GsapEngine.js"></script>
+		<script src="../build/unminified/GsapRenderer.js"></script>
 		<script src="../build/unminified/WheelInput.js"></script>
 	</head>
 	<body>
@@ -45,11 +45,12 @@
 		<script>
 			
 			var $ = quark.$,
-				$$ = quark.$$;
+				$$ = quark.$$,
+				horizon = new Horizon();
 			
-			Horizon.wheel($('.hsla').node, function(args) {
+			horizon.wheel($('.hsla').node, function(coords) {
 				return {
-					background: 'hsla('+(args.y/10)+',50%,50%,0.3)'
+					background: 'hsla('+(coords.y/10)+',50%,50%,0.3)'
 				};
 			});
 			

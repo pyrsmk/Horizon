@@ -25,8 +25,8 @@
 		</style>
 		<script src="node_modules/pyrsmk-quark/quark.min.js"></script>
 		<script src="../build/unminified/Horizon.js"></script>
-		<script src="../build/unminified/GsapEngine.js"></script>
-		<script src="../build/unminified/Canvas2dEngine.js"></script>
+		<script src="../build/unminified/GsapRenderer.js"></script>
+		<script src="../build/unminified/Canvas2dRenderer.js"></script>
 		<script src="../build/unminified/ScrollInput.js"></script>
 	</head>
 	<body>
@@ -36,26 +36,26 @@
 		<script>
 			
 			var $ = quark.$,
-				$$ = quark.$$;
+				$$ = quark.$$,
+				scene = $('.scene').node,
+				horizon = new Horizon();
 			
-			Horizon.detectLayout();
+			scene.width = horizon.getSceneWidth();
+			scene.height = horizon.getSceneHeight();
 			
-			$('.scene').node.width = Horizon.viewport.width;
-			$('.scene').node.height = Horizon.viewport.height;
-			
-			var img = {
-				node: $('img').node,
-				left: (Horizon.layout.width - $('img').node.naturalWidth) / 2,
+			var properties = {
+				left: (horizon.getSceneWidth() - $('img').node.naturalWidth) / 2,
 				top: -300,
 				rotate: 0
 			};
 			
-			Horizon.initCanvas2D($('.scene').node, [img]);
+			horizon.initCanvas2D(scene);
+			scene.addImage($('img').node, properties);
 			
-			Horizon.scroll(img, function(args) {
+			horizon.scroll(properties, function(coords) {
 				return {
-					top: args.y * 1.2 - 300,
-					rotate: - args.y * 360 / Horizon.viewport.height
+					top: coords.y * 1.2 - 300,
+					rotate: - coords.y * 360 / horizon.getSceneHeight()
 				};
 			});
 			
