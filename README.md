@@ -1,4 +1,4 @@
-Horizon 4.0.1
+Horizon 4.0.2
 =============
 
 Horizon is a parallax engine, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).

@@ -48,6 +48,8 @@
 				$$ = quark.$$,
 				horizon = new Horizon();
 			
+			horizon.setBoundaries({y: [0, 3600]});
+			
 			horizon.wheel($('.hsla').node, function(coords) {
 				return {
 					background: 'hsla('+(coords.y/10)+',50%,50%,0.3)'

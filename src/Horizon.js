@@ -1,4 +1,4 @@
-/*! Horizon 4.0.1 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 4.0.2 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js');
 
@@ -211,17 +211,17 @@ var Horizon = function(scene) {
 			x, y, z, relativeX, relativeY, relativeZ, i, j, input;
 		// Normalize coords
 		if(context == 'relative') {
-			relativeX = 'x' in args ? parseInt(args.x,10) : 0;
-			relativeY = 'y' in args ? parseInt(args.y,10) : 0;
-			relativeZ = 'z' in args ? parseInt(args.z,10) : 0;
+			relativeX = 'x' in args ? parseInt(args.x, 10) : 0;
+			relativeY = 'y' in args ? parseInt(args.y, 10) : 0;
+			relativeZ = 'z' in args ? parseInt(args.z, 10) : 0;
 			x = horizon._x + relativeX;
 			y = horizon._y + relativeY;
 			z = horizon._z + relativeZ;
 		}
 		else {
-			x = 'x' in args ? parseInt(args.x,10) : horizon._x;
-			y = 'y' in args ? parseInt(args.y,10) : horizon._y;
-			z = 'z' in args ? parseInt(args.z,10) : horizon._z;
+			x = 'x' in args ? parseInt(args.x, 10) : horizon._x;
+			y = 'y' in args ? parseInt(args.y, 10) : horizon._y;
+			z = 'z' in args ? parseInt(args.z, 10) : horizon._z;
 			relativeX = x - horizon._x;
 			relativeY = y - horizon._y;
 			relativeZ = z - horizon._z;
@@ -269,9 +269,9 @@ var Horizon = function(scene) {
 							x: x,
 							y: y,
 							z: z,
-							relativeX: x,
-							relativeY: y,
-							relativeZ: z,
+							relativeX: relativeX,
+							relativeY: relativeY,
+							relativeZ: relativeZ,
 						};
 						// Define relative positions
 						if('offsetLeft' in element.node) {
