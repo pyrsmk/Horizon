@@ -1,4 +1,4 @@
-/*! Horizon 4.0.0 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 4.0.1 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js');
 
@@ -268,7 +268,10 @@ var Horizon = function(scene) {
 						var params = {
 							x: x,
 							y: y,
-							z: z
+							z: z,
+							relativeX: x,
+							relativeY: y,
+							relativeZ: z,
 						};
 						// Define relative positions
 						if('offsetLeft' in element.node) {
