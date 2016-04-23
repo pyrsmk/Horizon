@@ -1,3 +1,4 @@
 node_modules/
 tests/node_modules/
 tests/images/Thumbs.db
+tests/Thumbs.db

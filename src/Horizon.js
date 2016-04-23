@@ -1,4 +1,4 @@
-/*! Horizon 4.0.2 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 4.0.3 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js');
 
@@ -252,7 +252,7 @@ var Horizon = function(scene) {
 			}
 		}
 		// Generate animations
-		if(!('input' in args) || horizon._disabled_inputs.indexOf(args.input) == -1) {
+		if(!('caller' in args) || horizon._disabled_inputs.indexOf(args.caller) == -1) {
 			var left,
 				top,
 				width,
