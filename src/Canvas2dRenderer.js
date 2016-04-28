@@ -78,9 +78,9 @@ Horizon._registerPlugin(function(horizon) {
 				context.save();
 				// Scale image
 				if('scale' in images[i]) {
-					images[i].offsetWidth = images[i].naturalWidth * images[i].scale.x;
-					images[i].offsetHeight = images[i].naturalHeight * images[i].scale.y;
-					context.scale(images[i].scale.x, images[i].scale.y);
+					images[i].offsetWidth = images[i].naturalWidth * images[i].scale;
+					images[i].offsetHeight = images[i].naturalHeight * images[i].scale;
+					context.scale(images[i].scale, images[i].scale);
 				}
 				// Apply rotation
 				if('rotate' in images[i]) {

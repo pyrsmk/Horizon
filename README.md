@@ -1,4 +1,4 @@
-Horizon 4.0.3
+Horizon 4.1.0
 =============
 
 Horizon is a parallax engine, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
@@ -414,7 +414,7 @@ Please note that all usual properties that we can animate with the other plugins
 
 - left : integer
 - top : integer
-- scale : {x, y}
+- scale : float (between 0 and 1)
 - rotate : integer (in degrees)
 - opacity : float (between 0 and 1)
 
