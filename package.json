@@ -1,7 +1,7 @@
 {
   "name": "pyrsmk-horizon",
   "description": "The next generation parallax library",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "author": "Aurélien Delogu <pyrsmk@dreamysource.fr> (http://dreamysource.fr)",
   "repository": {
     "type": "git",
@@ -26,7 +26,7 @@
     "url": "https://github.com/pyrsmk/Horizon/issues",
     "email": "dev@dreamysource.fr"
   },
-  "homepage": "http://horizonjs.io",
+  "homepage": "http://dreamysource.io/project/horizon",
   "devDependencies": {
     "browserify": "^10.2.3",
     "gulp": "^3.9.0",

@@ -1,4 +1,4 @@
-/*! Horizon 4.1.0 (https://github.com/pyrsmk/Horizon) */
+/*! Horizon 4.1.1 (https://github.com/pyrsmk/Horizon) */
 
 var W = require('../node_modules/pyrsmk-w/W.min.js');
 
