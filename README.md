@@ -23,26 +23,6 @@ bower install pyrsmk-horizon
 
 Pick Horizon and the needed plugins in the `build/` directory. Please note that you must include `Horizon` first, and `GsapRenderer` plugin should always be included.
 
-New things in v4
-----------------
-
-Many things in the API have moved since v3. Please read carefully the documentation to know what has changed.
-
-Future commercial license with the upcoming v5
-----------------------------------------------
-
-Please note that Horizon is currently completely free until v5. When the v5 will be out, Horizon will remain free for personal use only. The version will have many improvements :
-
-- GSAP will be replaced by an internal engine, without any performance loss (about ~70ko tinier)
-- new SVG engine
-- new HTML plugin (so you won't need to write any JS line)
-- new Text engine (so you'll can animate text)
-- and many more...
-
-Moreover, a website will be released too with a custom bundler to have the library that fits your needs!
-
-And if you're wondering why a commercial license is needed, you can read this [interesting paper from GreenSock](http://greensock.com/why-license) ;)
-
 Examples
 --------
 
