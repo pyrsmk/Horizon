@@ -1,7 +1,3 @@
-require('../node_modules/gsap/src/uncompressed/TweenLite.js');
-require('../node_modules/gsap/src/uncompressed/plugins/CSSPlugin.js');
-require('../node_modules/gsap/src/uncompressed/easing/EasePack.js');
-
 Horizon._registerRenderer('gsap', function(horizon, args) {
 	// Define animation options
 	var options = {};

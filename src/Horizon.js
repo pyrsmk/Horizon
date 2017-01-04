@@ -1,7 +1,3 @@
-/*! Horizon 4.1.1 (https://github.com/pyrsmk/Horizon) */
-
-var W = require('../node_modules/pyrsmk-w/W.min.js');
-
 // Constructor
 var Horizon = function(scene) {
 	// Init object
@@ -536,12 +532,6 @@ var Horizon = function(scene) {
 	horizon._scene = scene || document;
 	W.addListener(horizon.detectSceneDimensions)();
 	
-	// Init default renderer
-	var name;
-	for(name in Horizon._renderers) {
-		horizon.setDefaultRenderer(name);
-	}
-	
 	// Init input functions
 	var createInputFunc = function(name) {
 		return function(node, callback) {
@@ -671,6 +661,3 @@ Horizon._regex = {
 	rgba: /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
 	hsla: /hsla?\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/
 };
-
-// Export module
-module.exports = Horizon;

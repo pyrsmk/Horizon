@@ -1,5 +1,3 @@
-require('../node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js');
-
 var disableRendering = false;
 
 Horizon._registerInput('scroll', {

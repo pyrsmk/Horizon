@@ -1,5 +1,4 @@
-var Impetus = require('../node_modules/impetus/dist/impetus.js'),
-	impetus;
+var impetus;
 
 Horizon._registerInput('swipe', {
 	constructor: function(horizon, options) {

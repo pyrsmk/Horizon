@@ -1,4 +1,4 @@
-Horizon 4.1.1
+Horizon 4.2.0
 =============
 
 Horizon is a parallax engine, aiming to be robust and as flexible as possible. It's based on [GSAP](http://greensock.com/gsap), [Impetus](https://github.com/chrisbateman/impetus) and [W](https://github.com/pyrsmk/W).
@@ -18,7 +18,6 @@ Install
 
 ```
 npm install pyrsmk-horizon
-bower install pyrsmk-horizon
 ```
 
 Pick Horizon and the needed plugins in the `build/` directory. Please note that you must include `Horizon` first, and `GsapRenderer` plugin should always be included.
