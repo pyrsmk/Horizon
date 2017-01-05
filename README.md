@@ -20,8 +20,6 @@ Install
 npm install pyrsmk-horizon
 ```
 
-Pick Horizon and the needed plugins in the `build/` directory. Please note that you must include `Horizon` first, and `GsapRenderer` plugin should always be included.
-
 Examples
 --------
 
